@@ -1,28 +1,20 @@
 # Hi, I'm Rakesh 👋
 
 ## 🚀 About Me
-- Cloud Engineer
-- Learning AWS & DevOps
-- Interested in Automation & Scripting
+- , OperationNameValue, ActivityStatusValue
+
+let locks = resources
+| where type == "microsoft.authorization/locks"
+| extend resourceGroup = tostring(split(id, "/")[4])
+| project resourceGroup, lockType = tostring(properties.level), lockName = name;
 
 resourcecontainers
 | where type == "microsoft.resources/subscriptions/resourcegroups"
-| extend rgId = tolower(id)
-| project resourceGroup = name, rgId
-| join kind=leftouter (
-    resources
-    | where type == "microsoft.authorization/locks"
-    | extend rgId = tolower(properties.scope)
-    | project lockName = name, rgId, lockType = tostring(properties.level)
-) on rgId
-| extend lockStatus = iff(isempty(lockName), "No Lock", lockType)
-| project resourceGroup, lockStatus
+| project resourceGroup = name
+| join kind=leftouter locks on resourceGroup
+| summarize lockType = any(lockType) by resourceGroup
+| extend lockStatus = iff(isempty(lockType), "No Lock", lockType)
 | order by resourceGroup asc
-
-AzureActivity
-| where OperationNameValue contains "Microsoft.Authorization/locks"
-| project TimeGenerated, ResourceGroup, OperationNameValue, ActivityStatusValue
-
 
 ## 🛠 Skills
 - AWS
