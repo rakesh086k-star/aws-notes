@@ -7,12 +7,14 @@
 
 resourcecontainers
 | where type == "microsoft.resources/subscriptions/resourcegroups"
-| project resourceGroup=name, subscriptionId
+| extend rgId = tolower(id)
+| project resourceGroup = name, rgId
 | join kind=leftouter (
     resources
     | where type == "microsoft.authorization/locks"
-    | project lockName=name, resourceGroup, lockType=tostring(properties.level)
-) on resourceGroup
+    | extend rgId = tolower(properties.scope)
+    | project lockName = name, rgId, lockType = tostring(properties.level)
+) on rgId
 | extend lockStatus = iff(isempty(lockName), "No Lock", lockType)
 | project resourceGroup, lockStatus
 | order by resourceGroup asc
