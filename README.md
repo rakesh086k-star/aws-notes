@@ -1,9 +1,12 @@
-# Hi, I'm Rakesh 
 
-resources
-| where type =~ "microsoft.authorization/locks"
-| project name, id, properties
-
+Get-AzResourceLock | Select-Object `
+    Name,
+    LockLevel,
+    ResourceGroupName,
+    ResourceName,
+    ResourceType,
+    LockId,
+    Notes
 
 
 ## 🛠 Skills
