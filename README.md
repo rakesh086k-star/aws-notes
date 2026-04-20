@@ -1,13 +1,15 @@
-echo "ResourceGroup | LockName | LockLevel | Notes"
+let locks = resources
+| where type =~ "microsoft.authorization/locks"
+| extend resourceGroup = resourceGroup
+| extend lockName = name
+| extend lockType = tostring(properties.level)
+| extend notes = tostring(properties.notes)
+| project resourceGroup, lockName, lockType, notes;
 
-az group list --query "[].name" -o tsv | while read rg; do
-    lock_count=$(az lock list --resource-group $rg --query "length(@)")
-
-    if [ "$lock_count" -eq 0 ]; then
-        echo "$rg | No Lock | None |"
-    else
-        az lock list --resource-group $rg \
-        --query "[].join(' | ', ['${rg}', name, level, notes])" \
-        -o tsv
-    fi
-done
+resourcecontainers
+| where type == "microsoft.resources/subscriptions/resourcegroups"
+| project resourceGroup = name, subscriptionId
+| join kind=leftouter locks on resourceGroup
+| extend lockStatus = iff(isnotempty(lockName), "Locked", "Not Locked")
+| project subscriptionId, resourceGroup, lockStatus, lockName, lockType, notes
+| order by resourceGroup asc
