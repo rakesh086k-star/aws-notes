@@ -1,11 +1,13 @@
-resources
-| where type == "microsoft.authorization/locks"
-| extend lockName = name
-| extend lockType = properties.level
-| extend notes = properties.notes
-| extend scope = tostring(properties.scope)
-| extend resourceGroup = resourceGroup
-| project subscriptionId, resourceGroup, lockName, lockType, scope, notes
-| order by resourceGroup asc
+echo "ResourceGroup | LockName | LockLevel | Notes"
 
-$result | Export-Csv "C:\Temp\RG-Lock-Report.csv" -NoTypeInformation
+az group list --query "[].name" -o tsv | while read rg; do
+    lock_count=$(az lock list --resource-group $rg --query "length(@)")
+
+    if [ "$lock_count" -eq 0 ]; then
+        echo "$rg | No Lock | None |"
+    else
+        az lock list --resource-group $rg \
+        --query "[].join(' | ', ['${rg}', name, level, notes])" \
+        -o tsv
+    fi
+done
