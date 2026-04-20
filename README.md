@@ -1,3 +1,3 @@
 resources
-| where type contains "lock"
-| project type, name
+| where resourceGroup == "RG-AVD-BV-EI-US"
+| project name, type
