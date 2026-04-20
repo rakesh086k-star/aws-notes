@@ -1,3 +1,3 @@
 resources
-| where type =~ "microsoft.authorization/locks"
-| project name, properties.scope
+| where type contains "lock"
+| project type, name
