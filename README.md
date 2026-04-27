@@ -1,54 +1,27 @@
-$resourceGroups = @("RG-Prod","RG-Test")
-
 Connect-AzAccount
 Set-AzContext -Subscription "<YOUR-SUBSCRIPTION-ID>"
 
-$subscriptionId = (Get-AzContext).Subscription.Id
+$resourceGroups = @("RG-Prod","RG-Test")
 
 foreach ($rg in $resourceGroups) {
 
-    $vms = Get-AzVM -ResourceGroupName $rg
+    Write-Output "Processing RG: $rg"
 
-    foreach ($vm in $vms) {
+    Get-AzVM -ResourceGroupName $rg | ForEach-Object {
 
-        $vmName = $vm.Name
-        $location = $vm.Location
-        $scheduleName = "shutdown-computevm-$vmName"
+        $vm = $_
 
-        $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$rg/providers/Microsoft.DevTestLab/schedules/$scheduleName?api-version=2018-09-15"
+        Write-Output "Enabling Auto Shutdown for $($vm.Name)"
 
-        # Get existing schedule
-        $existing = Invoke-AzRestMethod -Method GET -Uri $uri -ErrorAction SilentlyContinue
-
-        if ($existing) {
-
-            $existingObj = $existing.Content | ConvertFrom-Json
-
-            $time = $existingObj.properties.dailyRecurrence.time
-            $timezone = $existingObj.properties.timeZoneId
-
-            Write-Output "Re-enabling Auto Shutdown for $vmName"
-
-            $body = @{
-                location = $location
-                properties = @{
-                    status = "Enabled"
-                    taskType = "ComputeVmShutdownTask"
-                    dailyRecurrence = @{
-                        time = $time
-                    }
-                    timeZoneId = $timezone
-                    notificationSettings = @{
-                        status = "Disabled"
-                        timeInMinutes = 30
-                    }
-                }
-            } | ConvertTo-Json -Depth 6
-
-            Invoke-AzRestMethod -Method PUT -Uri $uri -Payload $body
-        }
-        else {
-            Write-Output "No existing schedule for $vmName"
-        }
+        New-AzResource `
+          -ResourceId "/subscriptions/$((Get-AzContext).Subscription.Id)/resourceGroups/$rg/providers/Microsoft.DevTestLab/schedules/shutdown-computevm-$($vm.Name)" `
+          -Location $vm.Location `
+          -Properties @{
+              status = "Enabled"
+              taskType = "ComputeVmShutdownTask"
+              dailyRecurrence = @{ time = "1900" }
+              timeZoneId = "India Standard Time"
+          } `
+          -Force
     }
 }
