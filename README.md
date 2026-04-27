@@ -17,18 +17,18 @@ foreach ($rg in $resourceGroups) {
 
         $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$rg/providers/Microsoft.DevTestLab/schedules/$scheduleName?api-version=2018-09-15"
 
+        # Get existing schedule
         $existing = Invoke-AzRestMethod -Method GET -Uri $uri -ErrorAction SilentlyContinue
 
         if ($existing) {
-
-            Write-Output "Enabling Auto Shutdown for $vmName"
 
             $existingObj = $existing.Content | ConvertFrom-Json
 
             $time = $existingObj.properties.dailyRecurrence.time
             $timezone = $existingObj.properties.timeZoneId
 
-            # Rebuild body safely
+            Write-Output "Re-enabling Auto Shutdown for $vmName"
+
             $body = @{
                 location = $location
                 properties = @{
@@ -38,13 +38,17 @@ foreach ($rg in $resourceGroups) {
                         time = $time
                     }
                     timeZoneId = $timezone
+                    notificationSettings = @{
+                        status = "Disabled"
+                        timeInMinutes = 30
+                    }
                 }
-            } | ConvertTo-Json -Depth 5
+            } | ConvertTo-Json -Depth 6
 
             Invoke-AzRestMethod -Method PUT -Uri $uri -Payload $body
         }
         else {
-            Write-Output "No existing schedule for $vmName (skipped)"
+            Write-Output "No existing schedule for $vmName"
         }
     }
 }
