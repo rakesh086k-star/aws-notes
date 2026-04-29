@@ -3,4 +3,4 @@ az vm get-instance-view \
   --name YOUR_VM_NAME \
   --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \
   -o tsv
-
+ d
