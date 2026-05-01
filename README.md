@@ -51,5 +51,15 @@ WVDConnections
 ) on Computer
 
 
+WVDConnections
+| summarize UserCount=dcount(UserName) by UserName, GatewayRegion, SourceSystem
+| extend GatewayRegion = case(
+    GatewayRegion == "eastus", "🔵 East US",
+    GatewayRegion == "eastasia", "🟢 East Asia",
+    GatewayRegion == "eastus2", "🟠 East US 2",
+    GatewayRegion == "centralindia", "🟣 Central India",
+    GatewayRegion
+)
+
 
 
