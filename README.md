@@ -66,3 +66,22 @@ AzureDiagnostics
 | sort by TimeGenerated desc
 | take 10
 
+
+--------------------
+
+Resources
+| where type == "microsoft.compute/virtualmachines"
+| where resourceGroup =~ "<YOUR-RG-NAME>"
+| extend powerState = tostring(properties.extended.instanceView.powerState.code)
+| extend Status = case(
+    powerState == "PowerState/running", "Running",
+    powerState == "PowerState/stopped", "Stopped",
+    powerState == "PowerState/deallocated", "Deallocated",
+    "Unavailable"
+)
+| summarize 
+    Total = count(),
+    Running = countif(Status == "Running"),
+    Stopped = countif(Status == "Stopped"),
+    Deallocated = countif(Status == "Deallocated"),
+    Unavailable = countif(Status == "Unavailable")
