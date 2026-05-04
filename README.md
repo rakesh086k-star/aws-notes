@@ -8,15 +8,16 @@ WVDConnections
 
 WVDConnections
 | where TimeGenerated > ago(7d)
-| extend DayName = format_datetime(TimeGenerated, "dddd")
-| summarize UniqueUsers = dcount(UserName) by DayName
-| order by case(
-    DayName == "Monday", 1,
-    DayName == "Tuesday", 2,
-    DayName == "Wednesday", 3,
-    DayName == "Thursday", 4,
-    DayName == "Friday", 5,
-    DayName == "Saturday", 6,
-    DayName == "Sunday", 7,
-    99
+| extend DayNumber = dayofweek(TimeGenerated)
+| extend DayName = case(
+    DayNumber == 0d, "Sunday",
+    DayNumber == 1d, "Monday",
+    DayNumber == 2d, "Tuesday",
+    DayNumber == 3d, "Wednesday",
+    DayNumber == 4d, "Thursday",
+    DayNumber == 5d, "Friday",
+    DayNumber == 6d, "Saturday",
+    "Unknown"
 )
+| summarize UniqueUsers = dcount(UserName) by DayName, DayNumber
+| order by DayNumber asc
