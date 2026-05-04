@@ -9,4 +9,4 @@ WVDConnections
     "Normal"
 )
 | project TimeGenerated, UserName, ClientType, State, Highlight
-| order by TimeGenerated desc
+| order by TimeGenerated des
