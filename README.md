@@ -1,9 +1,20 @@
-WVDConnections
-| extend TimeBucket = case(
-    TimeGenerated > ago(1d), "Daily",
-    TimeGenerated > ago(7d), "Weekly",
-    TimeGenerated > ago(30d), "Monthly",
-    "Older"
+union
+(
+    WVDConnections
+    | where TimeGenerated > ago(1d)
+    | summarize TotalLogins = count()
+    | extend Period = "Daily"
+),
+(
+    WVDConnections
+    | where TimeGenerated > ago(7d)
+    | summarize TotalLogins = count()
+    | extend Period = "Weekly"
+),
+(
+    WVDConnections
+    | where TimeGenerated > ago(30d)
+    | summarize TotalLogins = count()
+    | extend Period = "Monthly"
 )
-| summarize TotalLogins = count() by TimeBucket
-| order by TimeBucket desc
+| order by Period asc
