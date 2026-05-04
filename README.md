@@ -1,11 +1,17 @@
 WVDConnections
 | where TimeGenerated > ago(24h)
-| where State == "Failed"
 | extend SourceClient = tostring(ClientType)
-| extend ErrorMessageText = "No detailed error available in WVDConnections table"
+| extend Status = case(
+    State == "Active", "🟢 Active",
+    State == "Connected", "🟢 Connected",
+    State == "Disconnected", "🟡 Disconnected",
+    State == "Failed", "🔴 Connection Error",
+    "⚪ Unknown"
+)
 | project TimeGenerated,
           UserName,
           SessionHostName,
           SourceClient,
-          ErrorMessageText
+          State,
+          Status
 | order by TimeGenerated desc
