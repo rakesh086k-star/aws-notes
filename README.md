@@ -135,3 +135,15 @@ vms
     Stopped = countif(Status == "Stopped"),
     Deallocated = countif(Status == "Deallocated"),
     Unavailable = countif(Status == "Unavailable")
+
+
+    -----
+
+    Resources
+| where type == "microsoft.compute/virtualmachines"
+| where resourceGroup =~ "<YOUR-RG-NAME>"
+| extend powerState = tostring(properties.extended.instanceView.powerState.code)
+| summarize 
+    Running = countif(powerState == "PowerState/running"),
+    Stopped = countif(powerState == "PowerState/stopped"),
+    Deallocated = countif(powerState == "PowerState/deallocated")
