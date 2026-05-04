@@ -1,14 +1,11 @@
 WVDConnections
 | where TimeGenerated > ago(24h)
 | where State == "Failed"
-| where isnotempty(ClientType)
-| extend SourceClient = ClientType
-| extend ErrorMessageText = coalesce(ErrorMessage, "No error message available")
-| extend Highlight = "🔥 Connection Error"
+| extend SourceClient = tostring(ClientType)
+| extend ErrorMessageText = tostring(coalesce(ErrorDetails, FailureReason, "No error message available"))
 | project TimeGenerated,
           UserName,
           SessionHostName,
           SourceClient,
-          ErrorMessageText,
-          Highlight
+          ErrorMessageText
 | order by TimeGenerated desc
