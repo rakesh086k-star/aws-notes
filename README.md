@@ -1,10 +1,9 @@
 WVDConnections
-| where TimeGenerated > ago(30d)
 | extend TimeBucket = case(
-    TimeGenerated > ago(1d), "Daily (24h)",
-    TimeGenerated > ago(7d), "Weekly (7d)",
-    TimeGenerated > ago(30d), "Monthly (30d)",
+    TimeGenerated > ago(1d), "Daily",
+    TimeGenerated > ago(7d), "Weekly",
+    TimeGenerated > ago(30d), "Monthly",
     "Older"
 )
-| summarize UniqueUsers = dcount(UserName) by TimeBucket
+| summarize TotalLogins = count() by TimeBucket
 | order by TimeBucket desc
