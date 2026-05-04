@@ -17,4 +17,9 @@ union
     | summarize UniqueUsers = dcount(UserName)
     | extend Period = "Monthly"
 )
-| order by Period asc
+| project Period, UniqueUsers
+| order by case(Period,
+    "Daily", 1,
+    "Weekly", 2,
+    "Monthly", 3,
+    4)
