@@ -11,6 +11,14 @@ WVDConnections
 | extend LoginDate = startofday(TimeGenerated)
 | extend DayName = format_datetime(TimeGenerated, "dddd")
 | summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
+| order by LoginDate 
+WVDConnections
+| where TimeGenerated > ago(7d)
+| extend LoginDate = startofday(TimeGenerated)
+| extend DayName = format_datetime(LoginDate, "dddd")
+| summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
 | order by LoginDate asc
+
+
 
 
