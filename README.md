@@ -106,3 +106,32 @@ vms
     "Running"
 )
 | summarize count() by Status
+
+
+-------------------
+
+
+let vms = Resources
+| where type == "microsoft.compute/virtualmachines"
+| where resourceGroup =~ "<YOUR-RG-NAME>"
+| project VMName = name,
+         powerState = tostring(properties.extended.instanceView.powerState.code);
+
+let heartbeat = Heartbeat
+| summarize lastSeen = max(TimeGenerated) by Computer;
+
+vms
+| join kind=leftouter heartbeat on $left.VMName == $right.Computer
+| extend Status = case(
+    powerState == "PowerState/deallocated", "Deallocated",
+    powerState == "PowerState/stopped", "Stopped",
+    powerState == "PowerState/running" and lastSeen < ago(10m), "Unavailable",
+    powerState == "PowerState/running", "Running",
+    "Unknown"
+)
+| summarize 
+    Total = count(),
+    Running = countif(Status == "Running"),
+    Stopped = countif(Status == "Stopped"),
+    Deallocated = countif(Status == "Deallocated"),
+    Unavailable = countif(Status == "Unavailable")
