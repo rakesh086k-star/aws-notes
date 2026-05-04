@@ -1,12 +1,17 @@
-let IdleThreshold = 30m;
-
-let LatestSessions =
+let Sessions =
     WVDConnections
     | summarize arg_max(TimeGenerated, *) by UserName;
 
-LatestSessions
-| extend TimeDiff = now() - TimeGenerated
-| summarize
-    ActiveSessions = countif(State == "Connected"),
-    DisconnectedUsers = countif(State == "Disconnected"),
-    IdleUsers = countif(State == "Disconnected" and TimeDiff > IdleThreshold)
+let SessionCounts =
+    Sessions
+    | summarize
+        ActiveSessions = countif(State == "Connected"),
+        DisconnectedSessions = countif(State == "Disconnected");
+
+let Hosts =
+    Heartbeat
+    | summarize arg_max(TimeGenerated, *) by Computer
+    | summarize TotalSessionHosts = count();
+
+SessionCounts
+| extend TotalSessionHosts = toscalar(Hosts)
