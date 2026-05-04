@@ -1,18 +1,12 @@
-let Base = Heartbeat
-| summarize LastSeen = max(TimeGenerated) by Computer;
-
-let Total = toscalar(Base | summarize count());
-
-let StatusData =
-Base
-| extend Status = iff(LastSeen > ago(10m), "Active", "Inactive")
-| summarize Count = count() by Status;
-
-datatable(Status:string)
-[
-"Active",
-"Inactive"
-]
-| join kind=leftouter StatusData on Status
-| extend Count = coalesce(Count, 0),
-         TotalSystems = Total
+WVDConnections
+| extend Status = case(
+    State == "Active", "Green - Active",
+    State == "Connected", "Green - Connected",
+    State == "Disconnected", "Yellow - Disconnected",
+    State == "Failed", "Red - Connection Error",
+    "Gray - Unknown"
+)
+| extend IsError = iff(State == "Failed", 1, 0)
+| extend HasSession = iff(isnotempty(UserName), 1, 0)
+| project TimeGenerated, UserName, SessionHostName, State, Status, IsError, HasSession
+| order by TimeGenerated desc
