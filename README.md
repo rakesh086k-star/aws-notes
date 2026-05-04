@@ -63,3 +63,87 @@ WVDConnections
 
 
 
+--------Dashboard---------
+
+Heartbeat
+| summarize TotalSystems = dcount(Computer)
+
+-----------------------------------
+
+let cpu = Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize avgCPU = avg(CounterValue) by Computer;
+
+cpu
+| extend Status = case(
+    avgCPU < 60, "Healthy",
+    avgCPU < 80, "Warning",
+    "Critical"
+)
+| summarize Count = count() by Status
+
+---------------------------------------
+
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize avgCPU = avg(CounterValue)
+
+
+______________________________
+
+Perf
+| where ObjectName == "Memory" and CounterName == "% Committed Bytes In Use"
+| summarize avgMemory = avg(CounterValue)
+
+-------
+
+Perf
+| where ObjectName == "LogicalDisk" and CounterName == "% Free Space"
+| summarize avgFree = avg(CounterValue)
+| extend DiskUsed = 100 - avgFree
+
+-----
+WVDConnections
+| summarize ActiveSessions = count()
+--------
+
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize avgCPU = avg(CounterValue)
+
+--------
+Connection Errors
+
+WVDConnections
+| where State == "Failed"
+| summarize Errors = count() by bin(TimeGenerated, 5m)
+
+-----
+recent alreat 
+AzureDiagnostics
+| where Level == "Error"
+| project TimeGenerated, Resource, OperationName, ResultDescription
+| sort by TimeGenerated desc
+  
+------
+10. Top Systems by Resource Usage
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize avgCPU = avg(CounterValue) by Computer
+| top 5 by avgCPU desc
+
+---------------------
+
+| where State == "Connected"
+| extend IdleTime = datetime_diff("minute", now(), TimeGenerated)
+| extend Status = iff(IdleTime > 10, "Idle", "Active")
+| summarize Users = dcount(UserName) by Status;
+
+let disconnected =
+WVDConnections
+| where State == "Disconnected"
+| summarize Users = dcount(UserName)
+| extend Status = "Disconnected";
+
+connected
+| union disconnected
