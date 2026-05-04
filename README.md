@@ -17,6 +17,24 @@ WVDConnections
 | extend LoginDate = startofday(TimeGenerated)
 | extend DayName = format_datetime(LoginDate, "dddd")
 | summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
+| order by LoginDate 
+
+
+WVDConnections
+| where TimeGenerated > ago(7d)
+| extend LoginDate = startofday(TimeGenerated)
+| extend DayNum = dayofweek(LoginDate)
+| extend DayName = case(
+    DayNum == 0d, "Sunday",
+    DayNum == 1d, "Monday",
+    DayNum == 2d, "Tuesday",
+    DayNum == 3d, "Wednesday",
+    DayNum == 4d, "Thursday",
+    DayNum == 5d, "Friday",
+    DayNum == 6d, "Saturday",
+    "Unknown"
+)
+| summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
 | order by LoginDate asc
 
 
