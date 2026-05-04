@@ -1,7 +1,9 @@
-WVDConnections
-| where HostPoolName == "<Your-HostPool-Name>"
-| summarize arg_max(TimeGenerated, State) by UserName, Computer
-| summarize 
-    LoggedIn = countif(State == "Connected"),
-    Disconnected = countif(State == "Disconnected")
-by Computer
+let Base = Heartbeat
+| summarize LastSeen = max(TimeGenerated) by Computer;
+
+let Total = toscalar(Base | summarize count());
+
+Base
+| extend Status = iff(LastSeen > ago(10m), "Active", "Inactive")
+| summarize Count = count() by Status
+| extend TotalSystems = Total
