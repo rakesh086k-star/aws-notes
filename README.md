@@ -32,3 +32,18 @@ let disconnected = base
 active
 | join kind=fullouter idle on 1==1
 | join kind=fullouter disconnected on 1==1
+
+
+ppppppppppppppppp
+
+let IdleThreshold = 15;   // minutes (you can change)
+let LatestConnections =
+    WVDConnections
+    | summarize arg_max(TimeGenerated, *) by UserName;
+
+LatestConnections
+| extend IdleMinutes = datetime_diff("minute", now(), TimeGenerated)
+| summarize 
+    ActiveSessions = countif(State == "Connected"),
+    DisconnectedUsers = countif(State == "Disconnected"),
+    IdleUsers = countif(State == "Connected" and IdleMinutes > IdleThreshold)
