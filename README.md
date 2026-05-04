@@ -1,4 +1,12 @@
 WVDConnections
-| where State == "Failed"
-| summarize ErrorCount = count() by SessionHostName, ClientType
-| order by ErrorCount desc
+| where TimeGenerated > ago(24h)
+| extend IsError = iff(State == "Failed", "Error", "OK")
+| extend IsClient = iff(ClientType != "", "Client", "Other")
+| extend Highlight = case(
+    State == "Failed" and ClientType != "", "🔥 Client Error",
+    State == "Failed", "❗ Error",
+    ClientType != "", "🔹 Client",
+    "Normal"
+)
+| project TimeGenerated, UserName, ClientType, State, Highlight
+| order by TimeGenerated desc
