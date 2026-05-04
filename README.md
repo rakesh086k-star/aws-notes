@@ -35,6 +35,23 @@ WVDConnections
     "Unknown"
 )
 | summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
+| order by LoginDate 
+
+WVDConnections
+| where TimeGenerated > ago(7d)
+| extend LoginDate = startofday(TimeGenerated)
+| extend DayName = case(
+    dayofweek(LoginDate) == 0d, "Sunday",
+    dayofweek(LoginDate) == 1d, "Monday",
+    dayofweek(LoginDate) == 2d, "Tuesday",
+    dayofweek(LoginDate) == 3d, "Wednesday",
+    dayofweek(LoginDate) == 4d, "Thursday",
+    dayofweek(LoginDate) == 5d, "Friday",
+    dayofweek(LoginDate) == 6d, "Saturday",
+    "Unknown"
+)
+| summarize UniqueUsers = dcount(UserName) by LoginDate, DayName
+| project LoginDate, DayName, UniqueUsers
 | order by LoginDate asc
 
 
