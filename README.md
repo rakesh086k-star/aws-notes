@@ -4,19 +4,19 @@ WVDConnections
 | extend WeeklyProjection = DailyUsers * 5
 | extend MonthlyProjection = DailyUsers * 22
 | extend DailyActual = DailyUsers
-| project DailyActual, WeeklyProjection, MonthlyProjection
-
+| project DailyActual, WeeklyProjection, 
 
 WVDConnections
 | where TimeGenerated > ago(7d)
 | extend DayName = format_datetime(TimeGenerated, "dddd")
 | summarize UniqueUsers = dcount(UserName) by DayName
-| order by case(DayName,
-    "Monday", 1,
-    "Tuesday", 2,
-    "Wednesday", 3,
-    "Thursday", 4,
-    "Friday", 5,
-    "Saturday", 6,
-    "Sunday", 7,
-    8)
+| order by case(
+    DayName == "Monday", 1,
+    DayName == "Tuesday", 2,
+    DayName == "Wednesday", 3,
+    DayName == "Thursday", 4,
+    DayName == "Friday", 5,
+    DayName == "Saturday", 6,
+    DayName == "Sunday", 7,
+    99
+)
