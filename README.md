@@ -1,6 +1,7 @@
 WVDConnections
-| summarize arg_max(TimeGenerated, *) by SessionId
+| where TimeGenerated > ago(24h)   // important for performance + freshness
+| summarize arg_max(TimeGenerated, State) by CorrelationId
 | summarize
-    ActiveSessions = countif(State == "Connected"),
-    DisconnectedSessions = countif(State == "Disconnected"),
+    ActiveSessions = countif(State has "Connect"),
+    DisconnectedSessions = countif(State has "Disconnect"),
     TotalSessions = count()
