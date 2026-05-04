@@ -85,3 +85,24 @@ Resources
     Stopped = countif(Status == "Stopped"),
     Deallocated = countif(Status == "Deallocated"),
     Unavailable = countif(Status == "Unavailable")
+
+
+    ---------------
+
+let vms = Resources
+| where type == "microsoft.compute/virtualmachines"
+| where resourceGroup =~ "<YOUR-RG-NAME>"
+| extend powerState = tostring(properties.extended.instanceView.powerState.code);
+
+let heartbeat = Heartbeat
+| summarize lastSeen = max(TimeGenerated) by Computer;
+
+vms
+| join kind=leftouter heartbeat on $left.name == $right.Computer
+| extend Status = case(
+    powerState == "PowerState/deallocated", "Deallocated",
+    powerState == "PowerState/stopped", "Stopped",
+    lastSeen < ago(10m), "Unavailable",
+    "Running"
+)
+| summarize count() by Status
