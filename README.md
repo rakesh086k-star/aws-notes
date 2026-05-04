@@ -2,7 +2,7 @@ WVDConnections
 | where TimeGenerated > ago(24h)
 | where State == "Failed"
 | extend SourceClient = tostring(ClientType)
-| extend ErrorMessageText = "Error details not available in this workspace"
+| extend ErrorMessageText = "No detailed error available in WVDConnections table"
 | project TimeGenerated,
           UserName,
           SessionHostName,
