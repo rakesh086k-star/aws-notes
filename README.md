@@ -262,4 +262,12 @@ Perf
 
 
 
+Heartbeat
+| where TimeGenerated > ago(24h)
+| summarize LastSeen = max(TimeGenerated) by Computer
+| extend Status = iff(LastSeen > ago(5m), "Active", "Inactive")
+| summarize Count = count() by Status
+
+
+
 
