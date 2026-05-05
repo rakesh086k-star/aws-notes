@@ -256,5 +256,10 @@ union cpu, disk, session
 | order by TimeGenerated desc
 
 
+Perf
+| where TimeGenerated > ago(24h)
+| summarize TotalMachines = dcount(Computer)
+
+
 
 
