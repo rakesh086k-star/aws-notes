@@ -147,3 +147,56 @@ Event
     Action
 | order by TimeGenerated desc
 
+let cpuThreshold = 80;
+let diskThreshold = 15;
+
+union isfuzzy=true
+
+// ===================== CPU HIGH =====================
+(
+    Perf
+    | where ObjectName == "Processor"
+    | where CounterName == "% Processor Time"
+    | summarize Value = avg(CounterValue) by bin(TimeGenerated, 5m), Computer, _ResourceId
+    | where Value > cpuThreshold
+    | extend MetricType = "CPU"
+    | extend Severity = "🔴 CRITICAL"
+    | extend Issue = "High CPU Utilization"
+),
+
+// ===================== DISK LOW =====================
+(
+    Perf
+    | where ObjectName == "LogicalDisk"
+    | where CounterName == "% Free Space"
+    | summarize Value = avg(CounterValue) by bin(TimeGenerated, 5m), Computer, InstanceName, _ResourceId
+    | where Value < diskThreshold
+    | extend MetricType = "Disk"
+    | extend Severity = "🟠 WARNING"
+    | extend Issue = "Low Disk Space"
+    | extend Computer = strcat(Computer, " (", InstanceName, ")")
+),
+
+// ===================== SESSION ISSUES =====================
+(
+    WVDCheckpoints
+    | where Message has "Disconnected" or State == "Disconnected"
+    | summarize Value = count() by bin(TimeGenerated, 5m), SessionHostName, HostPoolName, _ResourceId
+    | extend Computer = SessionHostName
+    | extend MetricType = "Session"
+    | extend Severity = "🔵 INFO"
+    | extend Issue = "User Session Disconnected"
+)
+
+// ===================== FINAL FORMAT =====================
+| project
+    TimeGenerated,
+    Computer,
+    MetricType,
+    Value,
+    Severity,
+    Issue
+| order by TimeGenerated desc
+
+
+
