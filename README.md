@@ -105,5 +105,45 @@ union isfuzzy=true
     Issue
 | order by TimeGenerated desc
 
+Event
+| where Source == "FSLogix Apps"
+| extend MessageText = tostring(RenderedDescription)
 
+// ---------------- Extract VM ----------------
+| extend VM = Computer
+
+// ---------------- Extract User (best effort) ----------------
+| extend User = extract(@"User:\s*([a-zA-Z0-9._-]+)", 1, MessageText)
+| extend User = iff(isempty(User), "Unknown", User)
+
+// ---------------- Profile Size (if present in logs) ----------------
+| extend ProfileSizeGB = todouble(extract(@"(\d+(\.\d+)?)\s*GB", 1, MessageText))
+| extend ProfileSize = iff(isnull(ProfileSizeGB), "Not Available", strcat(tostring(ProfileSizeGB), " GB"))
+
+// ---------------- Action detection ----------------
+| extend Action = case(
+    MessageText has "Mounted", "Mounted",
+    MessageText has "Attach", "Attach",
+    MessageText has "Unmounted", "Unmounted",
+    MessageText has "Detach", "Detach",
+    "Unknown"
+)
+
+// ---------------- Status logic ----------------
+| extend Status = case(
+    MessageText has "Failed" or MessageText has "Error", "Critical",
+    MessageText has "slow" or MessageText has "Slow", "Warning",
+    Action == "Mounted", "Healthy",
+    "Info"
+)
+
+// ---------------- FINAL OUTPUT ----------------
+| project
+    TimeGenerated,
+    VM,
+    User,
+    ProfileSize,
+    Status,
+    Action
+| order by TimeGenerated desc
 
