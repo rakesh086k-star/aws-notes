@@ -28,4 +28,32 @@ Perf
 CPUAlert
 | union MemoryAlert
 | union DiskAlert
-| order by Computer asc
+| order by Computer 
+
+let CPU =
+Perf
+| where TimeGenerated > ago(4h)
+| where CounterName == "% Processor Time"
+| summarize CPU=avg(CounterValue) by Computer;
+
+let Memory =
+Perf
+| where TimeGenerated > ago(4h)
+| where CounterName == "% Committed Bytes In Use"
+| summarize Memory=avg(CounterValue) by Computer;
+
+let Disk =
+Perf
+| where TimeGenerated > ago(4h)
+| where CounterName == "% Free Space"
+| summarize Disk=avg(CounterValue) by Computer;
+
+CPU
+| join kind=leftouter Memory on Computer
+| join kind=leftouter Disk on Computer
+| extend CPUStatus = case(CPU>80,"Critical", CPU>60,"Warning","Healthy")
+| extend MemStatus = case(Memory>80,"Critical", Memory>60,"Warning","Healthy")
+| extend DiskStatus = case(Disk<20,"Critical", Disk<40,"Warning","Healthy")
+| project Computer, CPU=round(CPU,1), CPUStatus,
+          Memory=round(Memory,1), MemStatus,
+          Disk=round(Disk,1), DiskStatus
