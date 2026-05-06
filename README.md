@@ -246,6 +246,8 @@ Additionally, I feel there is a lack of focused study on AVD concepts. It’s im
 
 It’s important to stay calm and try to understand step by step, even if something feels difficult. Please feel free to ask questions, but also try to practice and revisit the concepts on your own. This will help you improve faster and build more confidence in your work.
 
+| where TimeGenerated {TimeRange}
+
 
 
 
