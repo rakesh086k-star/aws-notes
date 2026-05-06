@@ -238,5 +238,15 @@ Thanks,
 
 
 
+hope you are doing well. I wanted to share some feedback from the recent KT sessions. I’ve noticed that some topics need to be repeated multiple times, which is slowing down your progress. At the moment, your progress is slower than expected and not at the level we are aiming for.
+
+Also, during one of the sessions, when I was explaining and my tone became slightly louder, you started to cry. I understand it may have felt uncomfortable, but my intention was only to help you understand the topic better.
+
+Additionally, I feel there is a lack of focused study on AVD concepts. It’s important to keep your main focus on understanding these concepts so that your basics remain clear and strong.
+
+It’s important to stay calm and try to understand step by step, even if something feels difficult. Please feel free to ask questions, but also try to practice and revisit the concepts on your own. This will help you improve faster and build more confidence in your work.
+
+
+
 
 
