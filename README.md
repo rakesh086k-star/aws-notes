@@ -1,7 +1,7 @@
 let CPUAlert =
 Perf
 | where TimeGenerated > ago(4h)
-| where ObjectName == "Processor"
+| where ObjectName in ("Processor", "Processor Information")
 | where CounterName == "% Processor Time"
 | where InstanceName == "_Total"
 | summarize AvgCPU = avg(CounterValue) by Computer
