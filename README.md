@@ -8,37 +8,37 @@ let Memory =
 Perf
 | where TimeGenerated > ago(4h)
 | where CounterName == "% Committed Bytes In Use"
-| summarize AvgMemoryUsed = avg(CounterValue) by Computer;
+| summarize AvgMemory = avg(CounterValue) by Computer;
 
 let Disk =
 Perf
 | where TimeGenerated > ago(4h)
 | where CounterName == "% Free Space"
 | summarize AvgDiskFree = avg(CounterValue) by Computer
-| extend AvgDiskUsed = 100 - AvgDiskFree;
+| extend DiskUsed = 100 - AvgDiskFree;
 
 CPU
 | join kind=fullouter Memory on Computer
 | join kind=fullouter Disk on Computer
 | extend
     CPU_Used = round(AvgCPU, 0),
-    Memory_Used = round(AvgMemoryUsed, 0),
-    Disk_Used = round(AvgDiskUsed, 0)
-| extend CPUStatus = case(CPU_Used > 80, "Critical", CPU_Used > 60, "Warning", "Healthy")
-| extend MemStatus = case(Memory_Used > 80, "Critical", Memory_Used > 60, "Warning", "Healthy")
-| extend DiskStatus = case(Disk_Used > 80, "Critical", Disk_Used > 60, "Warning", "Healthy")
+    Memory_Used = round(AvgMemory, 0),
+    Disk_Used = round(DiskUsed, 0),
+    Disk_Available = round(AvgDiskFree, 0)
+| extend CPU_Display = strcat(CPU_Used, "%")
+| extend Memory_Display = strcat(Memory_Used, "%")
+| extend DiskUsed_Display = strcat(Disk_Used, "%")
+| extend DiskAvail_Display = strcat(Disk_Available, "%")
 | extend OverallStatus = case(
-    CPUStatus == "Critical" or MemStatus == "Critical" or DiskStatus == "Critical", "Critical",
-    CPUStatus == "Warning" or MemStatus == "Warning" or DiskStatus == "Warning", "Warning",
+    CPU_Used > 80 or Memory_Used > 80 or Disk_Used > 80, "Critical",
+    CPU_Used > 60 or Memory_Used > 60 or Disk_Used > 60, "Warning",
     "Healthy"
 )
 | project
     Computer,
-    CPU_Used,
-    Memory_Used,
-    Disk_Used,
-    CPUStatus,
-    MemStatus,
-    DiskStatus,
+    CPU_Display,
+    Memory_Display,
+    DiskUsed_Display,
+    DiskAvail_Display,
     OverallStatus
 | order by CPU_Used desc
