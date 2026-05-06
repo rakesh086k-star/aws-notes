@@ -220,59 +220,22 @@ Perf
 // ===================== DISK =====================
 let disk =
 Perf
-| where TimeGenerated > ago(24h)
-| where ObjectName == "LogicalDisk"
-| where CounterName == "% Free Space"
-| summarize Value = avg(CounterValue) by bin(TimeGenerated, 5m), Computer, InstanceName, _ResourceId
-| where isnotempty(Value)
-| where Value < diskThreshold
-| extend MetricType = "Disk"
-| extend Severity = "🟠 WARNING"
-| extend Issue = "Low Disk Space"
-| extend Computer = strcat(Computer, " (", InstanceName, ")");
+| 
+Hi [Engineer Name],
 
-// ===================== SESSION =====================
-let session =
-WVDCheckpoints
-| where TimeGenerated > ago(24h)
-| where Message has "Disconnected" or State == "Disconnected"
-| summarize Value = count() by bin(TimeGenerated, 5m), SessionHostName, _ResourceId
-| extend Computer = SessionHostName
-| extend MetricType = "Session"
-| extend Severity = "🔵 INFO"
-| extend Issue = "User Session Disconnected";
+AVD admin access has now been enabled for you. You are expected to take ownership of BAU activities and manage day-to-day operations without any failures or escalations.
 
-// ===================== UNION =====================
-union cpu, disk, session
+This email is to formally track your progress in this role.
 
-// ===================== FINAL OUTPUT =====================
-| project
-    TimeGenerated,
-    Computer,
-    MetricType,
-    Value,
-    Severity,
-    Issue
-| order by TimeGenerated desc
+You have completed around 2 years in the organization, however based on my observations, there is still a gap in handling assigned operational tasks and overall understanding of AVD infrastructure. You need to focus on improving your technical skills and strengthen your knowledge to meet the role expectations.
 
+Please work on these areas and show improvement in the coming weeks.
 
-Perf
-| where TimeGenerated > ago(24h)
-| summarize TotalMachines = dcount(Computer)
+Bharat is added for visibility.
 
+Thanks,  
+[Your Name]
 
-
-Heartbeat
-| where TimeGenerated > ago(24h)
-| summarize LastSeen = max(TimeGenerated) by Computer
-| extend Status = iff(LastSeen > ago(5m), "Active", "Inactive")
-| summarize Count = count() by Status
-
-Perf
-| where TimeGenerated > ago(24h)
-| summarize LastSeen = max(TimeGenerated) by Computer
-| extend Status = iff(LastSeen > ago(10m), "Reporting", "Not Reporting")
-| summarize Count = count() by Status
 
 
 
