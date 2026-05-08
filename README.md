@@ -1,10 +1,15 @@
 WVDConnections
 | where TimeGenerated > ago(24h)
-| summarize TotalEvents=count() by SessionHostName
+| where State in ("Disconnected", "Failed")
+| summarize
+    TotalIssues = count(),
+    States = make_set(State, 5),
+    LastIssueTime = max(TimeGenerated)
+    by SessionHostName
 | extend Severity = case(
-    TotalEvents >= 15, "Critical 🔴",
-    TotalEvents >= 8, "High 🟠",
-    TotalEvents >= 3, "Medium 🟡",
+    TotalIssues >= 15, "Critical 🔴",
+    TotalIssues >= 8, "High 🟠",
+    TotalIssues >= 3, "Medium 🟡",
     "Low 🟢"
 )
-| order by TotalEvents desc
+| order by TotalIssues desc
