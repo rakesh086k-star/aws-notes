@@ -75,3 +75,30 @@ WVDConnections
     SampleMessage
 | order by ErrorCount desc
 
+
+
+
+
+Perf
+| where TimeGenerated > ago(1d)
+| where (ObjectName == "Logical Disk" or ObjectName == "LogicalDisk")
+and CounterName contains "% Free Space"
+and InstanceName != "_Total"
+and InstanceName != "HarddiskVolume1"
+| extend AVDHostName = Computer
+| extend FreeSpace = CounterValue
+| extend DriveName = InstanceName
+| extend FreeSpaceGB = FreeSpace
+| extend SpaceStatus = case(
+    FreeSpaceGB < 5, "Critical",
+    FreeSpaceGB < 10, "Warning",
+    FreeSpaceGB < 30, "Normal",
+    "Medium"
+)
+| summarize arg_max(TimeGenerated, *) by AVDHostName
+| project AVDHostName, FreeSpaceGB, SpaceStatus, TimeGenerated
+| order by FreeSpaceGB desc
+
+
+
+
