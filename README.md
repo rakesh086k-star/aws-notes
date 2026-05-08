@@ -12,4 +12,4 @@ AzureDiagnostics
     ErrorCount >= 5, "Medium 🟡",
     "Low 🟢"
 )
-| order by ErrorCount desc
+| order by ErrorCount desc 
