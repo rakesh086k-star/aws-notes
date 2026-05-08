@@ -2,7 +2,9 @@ WVDConnections
 | where TimeGenerated > ago(24h)
 | summarize
     TotalEvents = count(),
-    States = make_set(State, 5)
+    States = make_set(State, 5),
+    ConnectionTypes = make_set(ConnectionType, 5),
+    ClientVersions = make_set(ClientVersion, 5)
     by SessionHostName
 | extend Severity = case(
     TotalEvents >= 15, "Critical 🔴",
