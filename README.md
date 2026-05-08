@@ -47,3 +47,31 @@ WVDConnections
     "Other Error"
 )
 | order by ErrorCount desc
+
+
+
+WVDConnections
+| project UserName, SessionHostName, CorrelationId
+| join kind=inner (
+    WVDErrors
+    | project CorrelationId, Code, Message
+) on CorrelationId
+| summarize
+    ErrorCount = count(),
+    SampleMessage = any(Message)
+    by SessionHostName, UserName, Code
+| extend ErrorSource = case(
+    Code in ("3076", "2055"), "Client Network Issue 🌐",
+    Code == "-2147467259", "System Error ❌",
+    Code == "516", "AVD Connectivity Issue ⚠️",
+    "Other Error"
+)
+| project
+    SessionHostName,
+    UserName,
+    ErrorSource,
+    Code,
+    ErrorCount,
+    SampleMessage
+| order by ErrorCount desc
+
