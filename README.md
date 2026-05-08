@@ -26,3 +26,24 @@ WVDConnections
 
 )
 | order by ErrorCount desc
+
+
+
+
+WVDConnections
+| project UserName, SessionHostName, CorrelationId
+| join kind=inner (
+    WVDErrors
+    | project CorrelationId, Code, Message
+) on CorrelationId
+| summarize
+    ErrorCount = count(),
+    SampleMessage = any(Message)
+    by SessionHostName, UserName, Code
+| extend ErrorSource = case(
+    Code == "3076", "Client Network Issue 🌐",
+    Code == "2055", "Session Connectivity Issue ⚠️",
+    Code == "-2147467259", "Unknown/System Error ❌",
+    "Other Error"
+)
+| order by ErrorCount desc
