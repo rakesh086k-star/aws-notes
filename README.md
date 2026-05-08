@@ -1,15 +1,10 @@
 WVDConnections
 | where TimeGenerated > ago(24h)
-| where State == "Completed"
-| where ConnectionType == "RDP"
-| where isnotempty(FailureType)
-    or isnotempty(FailureMessage)
+| where State != "Connected"
 | summarize
     ErrorCount = count(),
-    LatestError = max(TimeGenerated),
-    FailureReasons = make_set(FailureType, 5),
-    FailureMessages = make_set(FailureMessage, 5)
-    by SessionHostName
+    LatestIssue = max(TimeGenerated)
+    by SessionHostName, State
 | extend Severity = case(
     ErrorCount >= 15, "Critical 🔴",
     ErrorCount >= 8, "High 🟠",
