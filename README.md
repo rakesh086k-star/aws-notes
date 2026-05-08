@@ -48,3 +48,36 @@ Please review and share your feedback or any additional enhancement recommendati
 
 Thanks & Regards,  
 [Your Name]
+
+
+
+Dear [Manager Name],
+
+The AVD monitoring dashboard has been redesigned and enhanced to provide better visibility, simplified monitoring, and a more professional operational view.
+
+The updated dashboard now covers:
+
+• AVD Availability Overview  
+• VM Health Status  
+• Session Status Overview  
+• Daily User Login Status  
+• User Login Analytics  
+• Resource Utilization Analytics  
+• Storage Capacity Overview  
+• Critical Resource Alerts  
+• Session Connection Failures  
+
+Key improvements include:
+• Better dashboard readability and presentation  
+• Improved infrastructure and session visibility  
+• Faster issue identification and troubleshooting  
+• Simplified monitoring for daily operations  
+• More structured and management-friendly reporting
+
+Compared to the earlier dashboard, the updated version is cleaner, easier to understand, and provides a more effective monitoring experience.
+
+Please review and share your feedback or any additional suggestions.
+
+Thanks & Regards,  
+[Your Name]
+
