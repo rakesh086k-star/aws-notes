@@ -116,3 +116,9 @@ $result.Value[0].Message
 
 
 
+$context = (Connect-AzAccount -Identity).Context
+Set-AzContext -SubscriptionId $context.Subscription -DefaultProfile $context
+
+
+
+
