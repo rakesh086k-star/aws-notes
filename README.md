@@ -54,3 +54,35 @@ $result = Invoke-AzVMRunCommand `
 $result.Value[0].Message
 
 
+
+
+
+
+
+
+param (
+    [string]$VMName,
+    [string]$ResourceGroup
+)
+
+Connect-AzAccount -Identity
+
+Set-AzContext -SubscriptionId "YOUR-SUBSCRIPTION-ID"
+
+$command = @'
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v DisplayVersion
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuild
+'@
+
+$result = Invoke-AzVMRunCommand `
+    -ResourceGroupName $ResourceGroup `
+    -VMName $VMName `
+    -CommandId 'RunPowerShellScript' `
+    -ScriptString $command
+
+$result.Value[0].Message
+
+
+
+
