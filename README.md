@@ -227,3 +227,8 @@ catch {
     Write-Output "====================================="
 }
 
+
+# VM OS Version Checker
+
+Enter VM Hostname and Resource Group to fetch Windows OS details.
+
