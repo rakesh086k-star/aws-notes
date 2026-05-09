@@ -86,3 +86,33 @@ $result.Value[0].Message
 
 
 
+param (
+    [string]$VMName,
+    [string]$ResourceGroup
+)
+
+Disable-AzContextAutosave -Scope Process
+
+$context = (Connect-AzAccount -Identity).Context
+
+Set-AzContext -SubscriptionId $context.Subscription.Id -DefaultProfile $context
+
+$command = @'
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v DisplayVersion
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuild
+'@
+
+$result = Invoke-AzVMRunCommand `
+    -ResourceGroupName $ResourceGroup `
+    -VMName $VMName `
+    -CommandId 'RunPowerShellScript' `
+    -ScriptString $command `
+    -DefaultProfile $context
+
+$result.Value[0].Message
+
+
+
+
+
