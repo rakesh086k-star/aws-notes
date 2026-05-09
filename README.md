@@ -167,3 +167,63 @@ $result.Value[0].Message
 
 
 
+
+
+
+
+
+
+
+param (
+    [string]$VMName,
+    [string]$ResourceGroup
+)
+
+try {
+
+    # Prevent Azure context conflicts
+    Disable-AzContextAutosave -Scope Process
+
+    # Login using Automation Account Managed Identity
+    $context = (Connect-AzAccount -Identity).Context
+
+    # Set Subscription Context
+    Set-AzContext `
+        -SubscriptionId "YOUR-SUBSCRIPTION-ID" `
+        -DefaultProfile $context
+
+    # PowerShell command to run inside VM
+    $command = @'
+$cv = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+
+Write-Output "====================================="
+Write-Output "VM OS VERSION DETAILS"
+Write-Output "====================================="
+Write-Output "OS Name      : $($cv.ProductName)"
+Write-Output "Version      : $($cv.DisplayVersion)"
+Write-Output "Full Build   : $($cv.CurrentBuild).$($cv.UBR)"
+Write-Output "Computer Name: $env:COMPUTERNAME"
+Write-Output "====================================="
+'@
+
+    # Execute command on VM
+    $result = Invoke-AzVMRunCommand `
+        -ResourceGroupName $ResourceGroup `
+        -VMName $VMName `
+        -CommandId 'RunPowerShellScript' `
+        -ScriptString $command `
+        -DefaultProfile $context
+
+    # Display output
+    $result.Value[0].Message
+
+}
+catch {
+
+    Write-Output "====================================="
+    Write-Output "ERROR OCCURRED"
+    Write-Output "====================================="
+    Write-Output $_.Exception.Message
+    Write-Output "====================================="
+}
+
