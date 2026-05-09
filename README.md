@@ -232,3 +232,55 @@ catch {
 
 Enter VM Hostname and Resource Group to fetch Windows OS details.
 
+
+
+
+
+
+Hi Team,
+
+We have successfully implemented an automated solution for validating VM operating system version and build details through Azure Automation.
+
+Previously, validating OS version/build information required manual VM access or user coordination, especially in scenarios where:
+- Users were actively logged into dedicated VMs
+- VM access was restricted during business hours
+- Operations teams depended on user availability
+- Troubleshooting and patch validation activities consumed additional time
+
+To address this, we designed and implemented an automation-based solution using Azure Automation Runbooks and dashboard integration.
+
+Key Highlights:
+- Automated VM OS version and build retrieval
+- No direct VM login required
+- Reduced dependency on end users
+- Faster validation during incident troubleshooting and patch verification
+- Simplified operational workflow for support teams
+- Centralized and reusable solution for multiple environments
+
+Current Workflow:
+1. Open the dashboard utility
+2. Launch the VM OS Checker
+3. Enter VM hostname and resource group
+4. Retrieve OS version/build details instantly
+
+Benefits:
+- Improved operational efficiency
+- Reduced manual effort
+- Faster troubleshooting and validation
+- Better support experience
+- Secure and controlled access model
+
+This solution can further be extended for:
+- Patch compliance validation
+- Reboot status checks
+- Installed KB verification
+- Multi-VM health validation
+- Automated reporting/dashboarding
+
+Please let us know if additional enhancements or integrations are required.
+
+Thanks & Regards,
+[Your Name]
+
+
+
