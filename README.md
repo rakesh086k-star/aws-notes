@@ -122,3 +122,48 @@ Set-AzContext -SubscriptionId $context.Subscription -DefaultProfile $context
 
 
 
+
+
+
+
+
+
+
+
+
+param (
+    [string]$VMName,
+    [string]$ResourceGroup
+)
+
+# Prevent inherited Azure context issues
+Disable-AzContextAutosave -Scope Process
+
+# Login using Automation Account Managed Identity
+$context = (Connect-AzAccount -Identity).Context
+
+# Set Azure subscription context
+Set-AzContext -SubscriptionId "YOUR-SUBSCRIPTION-ID" -DefaultProfile $context
+
+# Command to fetch Windows OS details
+$command = @'
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v DisplayVersion
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuild
+'@
+
+# Execute command on VM
+$result = Invoke-AzVMRunCommand `
+    -ResourceGroupName $ResourceGroup `
+    -VMName $VMName `
+    -CommandId 'RunPowerShellScript' `
+    -ScriptString $command `
+    -DefaultProfile $context
+
+# Show output
+$result.Value[0].Message
+
+
+
+
+
