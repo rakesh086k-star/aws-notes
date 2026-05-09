@@ -30,3 +30,27 @@ Please note that the above pricing is an approximate estimate and may vary based
 
 Thanks & Regards,  
 [Your Name]
+
+
+
+
+param (
+    [string]$VMName,
+    [string]$ResourceGroup
+)
+
+$command = @'
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v DisplayVersion
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuild
+'@
+
+$result = Invoke-AzVMRunCommand `
+    -ResourceGroupName $ResourceGroup `
+    -VMName $VMName `
+    -CommandId 'RunPowerShellScript' `
+    -ScriptString $command
+
+$result.Value[0].Message
+
+
