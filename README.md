@@ -1,89 +1,18 @@
-param(
-    [string]$Mode,
+Dear Team,
 
-    [string]$VMName
-)
+The VM OS Version Automation has been successfully implemented and tested.
 
-# Fixed Resource Group
-$ResourceGroup = "RG-AVD-GA-EI-UW-DR"
+This automation will help the team by:
+- Reducing manual effort for VM OS version checks
+- Eliminating the need to manually access machines and collect details from backend/RDP sessions
+- Providing quick OS version, build version, and patching-related details directly from the automation
+- Supporting both single VM and all VM checks through simple input selection
 
-# Login using Managed Identity
-Disable-AzContextAutosave -Scope Process
+Now, the team only needs to provide the VM name for single machine checks or select the all-machine option to retrieve the required details quickly.
 
-$context = (Connect-AzAccount -Identity).Context
+This implementation will help improve operational efficiency and reduce turnaround time for validation activities.
 
-# Hide Azure Context Output
-Set-AzContext `
--SubscriptionId "YOUR-SUBSCRIPTION-ID" `
--DefaultProfile $context | Out-Null
+Thank you.
 
-# Validate Mode
-if ($Mode -notin @("Single","All")) {
-
-    Write-Output "Please enter Mode as Single or All"
-    return
-}
-
-# Validate VM Name
-if ($Mode -eq "Single" -and [string]::IsNullOrWhiteSpace($VMName)) {
-
-    Write-Output "Please provide VM Name"
-    return
-}
-
-# ALL VM Mode
-if ($Mode -eq "All") {
-
-    $VMs = Get-AzVM -ResourceGroupName $ResourceGroup
-
-    foreach ($VM in $VMs) {
-
-        $result = Invoke-AzVMRunCommand `
-        -ResourceGroupName $ResourceGroup `
-        -VMName $VM.Name `
-        -CommandId 'RunPowerShellScript' `
-        -ScriptString @'
-
-$cv = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-
-$FullBuild = "$($cv.CurrentBuild).$($cv.UBR)"
-
-Write-Output "-----------------------------------"
-Write-Output "VM Name           : $env:COMPUTERNAME"
-Write-Output "OS Name           : $($cv.ProductName)"
-Write-Output "OS Version        : $($cv.DisplayVersion)"
-Write-Output "Build Number      : $($cv.CurrentBuild)"
-Write-Output "Full Build Version: $FullBuild"
-Write-Output "-----------------------------------"
-
-'@
-
-        $result.Value.Message
-    }
-}
-
-# SINGLE VM Mode
-elseif ($Mode -eq "Single") {
-
-    $result = Invoke-AzVMRunCommand `
-    -ResourceGroupName $ResourceGroup `
-    -VMName $VMName `
-    -CommandId 'RunPowerShellScript' `
-    -ScriptString @'
-
-$cv = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-
-$FullBuild = "$($cv.CurrentBuild).$($cv.UBR)"
-
-Write-Output "-----------------------------------"
-Write-Output "VM Name           : $env:COMPUTERNAME"
-Write-Output "OS Name           : $($cv.ProductName)"
-Write-Output "OS Version        : $($cv.DisplayVersion)"
-Write-Output "Build Number      : $($cv.CurrentBuild)"
-Write-Output "Full Build Version: $FullBuild"
-Write-Output "-----------------------------------"
-
-'@
-
-    $result.Value.Message
-}
+Best Regards,  
+[Your Name]
