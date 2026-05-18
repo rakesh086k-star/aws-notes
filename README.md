@@ -1,17 +1,113 @@
-1. Need to review and optimize the system VDI headcount and ensure adequate team support coverage.  
+Feature
+Windows 365
+Azure Virtual Desktop (AVD)
+Solution Type
+Cloud PC
+Virtual Desktop Infrastructure (VDI)
+Management
+Simple and Microsoft-managed
+Advanced and customer-managed
+Deployment
+Quick and easy deployment
+Requires Azure and VDI knowledge
+Best For
+Small & medium businesses
+Enterprises and large environments
+User Experience
+Dedicated personal Cloud PC
+Personal or multi-session desktops
+Flexibility
+Limited customization
+Highly customizable
+Scalability
+Moderate
+High scalability
+Multi-Session Support
+No
+Yes
+Infrastructure Control
+Limited
+Full control
+Remote Work Support
+Excellent
+Excellent
+Hybrid Environment Support
+Basic
+Strong hybrid support
+Security
+Microsoft-managed security
+Advanced configurable security
+Maintenance Effort
+Low
+Medium to High
+Cost Model
+Fixed monthly pricing
+Consumption/pay-as-you-go
+Pricing Predictability
+Easy to predict
+Depends on usage
+Ideal Users
+Standard office users
+Developers, enterprise users, shared users
+External User Support
+Supported
+Supported
+Cloud Migration Support
+Easy onboarding
+Gradual migration possible
+Setup Complexity
+Easy
+Complex
+Performance Optimization
+Basic
+Advanced optimization available
 
-2. Conduct bi-weekly connect sessions with Salim to discuss the current environment and ongoing activities.  
 
-3. There are 29 Host Pools without configured Log Analytics Workspace; deployment and Azure Workbook dashboard configuration are required.  
+Approximate Monthly Cost Comparison
 
-4. Improve and standardize the dashboard color pattern for better visibility and user experience.  
+Configuration: 2 vCPU | 8 GB RAM | 128 GB Storage
+Configuration
+Windows 365 Business
+Azure Virtual Desktop (AVD)
+2 vCPU + 8 GB RAM + 128 GB
+Approx. USD 28–35/User/Month
+Approx. USD 20–45/User/Month
+Pricing Type
+Fixed
+Usage-based
+Additional Cost Factors
+Mostly included
+Storage, networking, VM uptime
+Cost Optimization
+Limited
+Better for large-scale optimization
+Budget Predictability
+High
+Medium
 
-5. Arrange AVD knowledge transfer sessions with the System VDI team to improve clarity and strengthen support knowledge.  
 
-6. Ensure System VDI support availability 24x7 for BAU operations.  
 
-7. Enable ASR for the remaining business services.  
 
-8. Implement ASR for DR and ensure managed disk replication is properly configured.  
 
-9. Discuss with the Convex business team and obtain confirmation for the DR uptime and RPO requirements.
+Requirement
+Recommended Solution
+Easy management
+Windows 365
+Fixed monthly cost
+Windows 365
+Quick deployment
+Windows 365
+Enterprise scalability
+Azure Virtual Desktop
+Multi-session environment
+Azure Virtual Desktop
+Advanced customization
+Azure Virtual Desktop
+Hybrid/on-prem integration
+Azure Virtual Desktop
+Large-scale cost optimization
+Azure Virtual Desktop
+
+
+
+
