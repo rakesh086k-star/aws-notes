@@ -97,3 +97,11 @@ param(
 
     [string]$VMName
 )
+
+
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$Mode,
+
+    [string]$VMName
+)
