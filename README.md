@@ -87,3 +87,13 @@ else {
 
     Write-Output "Please select Mode as Single or All"
 }
+
+
+
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet("Single","All")]
+    [string]$Mode,
+
+    [string]$VMName
+)
