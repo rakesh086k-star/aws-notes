@@ -49,3 +49,13 @@ Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
 else {
     Write-Output "Please select Mode as Single or All"
 }
+
+
+
+
+param(
+    [ValidateSet("Single","All")]
+    [string]$Mode,
+
+    [string]$VMName
+)
