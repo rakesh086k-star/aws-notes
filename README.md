@@ -1,18 +1,22 @@
-Dear Team,
+Hi Team,
 
-The VM OS Version Automation has been successfully implemented and tested.
+We reviewed the recent Microsoft announcement regarding the discontinuation of Azure Reserved Instance (RI) purchases/renewals for select VM series effective July 1, 2026.
 
-This automation will help the team by:
-- Reducing manual effort for VM OS version checks
-- Eliminating the need to manually access machines and collect details from backend/RDP sessions
-- Providing quick OS version, build version, and patching-related details directly from the automation
-- Supporting both single VM and all VM checks through simple input selection
+Impacted VM families mentioned by Microsoft include:
+- D / Ds
+- Dv2 / Dsv2
+- Dv3 / Dsv3
+- Ev3 / Esv3
+- F / Fs / Fsv2 and other legacy series
 
-Now, the team only needs to provide the VM name for single machine checks or select the all-machine option to retrieve the required details quickly.
+Currently, our environment is utilizing the below compute families with RI:
+- Standard_D8s_v5
+- Standard_D16s_v5
+- Standard_D8s_v4
 
-This implementation will help improve operational efficiency and reduce turnaround time for validation activities.
+Based on the initial assessment, our active V4/V5 compute series are not part of the impacted VM families listed in the announcement. No immediate impact has been identified for existing workloads.
 
-Thank you.
+We will additionally review current Azure Reservations to validate whether any legacy RI dependencies exist in the environment.
 
-Best Regards,  
-[Your Name]
+Regards,  
+Rakesh Kumar
