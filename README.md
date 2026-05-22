@@ -1,13 +1,10 @@
-param (
-[string]$VMName,
-[string]$ResourceGroup
-)
+param([string]$VMName,[string]$ResourceGroup)
 
 Connect-AzAccount -Identity
 
-Invoke-AzVMRunCommand -ResourceGroupName $ResourceGroup -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptString @'
+$Result=Invoke-AzVMRunCommand -ResourceGroupName $ResourceGroup -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptString @'
 
-Write-Output "========== FULL DISK CLEANUP STARTED =========="
+Write-Output "========== DISK CLEANUP STARTED =========="
 
 $Days=-1
 $DeletedCount=0
@@ -30,21 +27,15 @@ if(Test-Path $Path){
 Write-Output "Cleaning Path : $Path"
 
 Get-ChildItem $Path -Recurse -Force -ErrorAction SilentlyContinue |
-Where-Object {
-$.LastWriteTime -lt (Get-Date).AddDays($Days)
-} |
+Where-Object {$.LastWriteTime -lt (Get-Date).AddDays($Days)} |
 ForEach-Object {
 
 try{
-
 Remove-Item $.FullName -Recurse -Force -ErrorAction Stop
 $DeletedCount++
-
 }
 catch{
-
 Write-Output "Skipped File : $($.FullName)"
-
 }
 
 }
@@ -63,21 +54,15 @@ if(Test-Path $TempPath){
 Write-Output "Cleaning User Temp : $TempPath"
 
 Get-ChildItem $TempPath -Recurse -Force -ErrorAction SilentlyContinue |
-Where-Object {
-$.LastWriteTime -lt (Get-Date).AddDays($Days)
-} |
+Where-Object {$.LastWriteTime -lt (Get-Date).AddDays($Days)} |
 ForEach-Object {
 
 try{
-
 Remove-Item $.FullName -Recurse -Force -ErrorAction Stop
 $DeletedCount++
-
 }
 catch{
-
 Write-Output "Skipped File : $($_.FullName)"
-
 }
 
 }
@@ -97,8 +82,11 @@ $Recovered=[math]::Round(($FreeAfter-$FreeBefore),2)
 Write-Output "=========================================="
 Write-Output "Cleanup Completed Successfully"
 Write-Output "Deleted Files Count : $DeletedCount"
+Write-Output "Free Space Before Cleanup : $FreeBefore GB"
 Write-Output "Free Space After Cleanup : $FreeAfter GB"
 Write-Output "Recovered Disk Space : $Recovered GB"
 Write-Output "=========================================="
 
 '@
+
+$Result.Value.Message
