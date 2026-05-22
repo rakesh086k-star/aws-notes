@@ -98,3 +98,76 @@ Write-Output “==========================================”
 ’@
 
 $Result.Value.Message
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+RGName = “Your-ResourceGroup-Name”
+
+Get-AzVM -ResourceGroupName $RGName | ForEach-Object {
+
+$VM = $_
+
+$OSDisk = Get-AzDisk -ResourceGroupName $RGName
+-DiskName $VM.StorageProfile.OSDisk.Name
+
+[PSCustomObject]@{
+VMName = $VM.Name
+VMSize = $VM.HardwareProfile.VmSize
+OSDiskName = $OSDisk.Name
+OSDiskSizeGB = $OSDisk.DiskSizeGB
+DiskType = $OSDisk.Sku.Name
+Location = $VM.Location
+}
+
+} | Format-Table -AutoSize
+:::
+
+If you also want Data Disk details:
+
+:::writing{variant=“standard” id=“38472”}
+$RGName = “Your-ResourceGroup-Name”
+
+Get-AzVM -ResourceGroupName $RGName | ForEach-Object {
+
+$VM = $_
+
+$OSDisk = Get-AzDisk -ResourceGroupName $RGName
+-DiskName $VM.StorageProfile.OSDisk.Name
+
+[PSCustomObject]@{
+VMName = $VM.Name
+VMSize = $VM.HardwareProfile.VmSize
+DiskName = $OSDisk.Name
+DiskSizeGB = $OSDisk.DiskSizeGB
+DiskType = $OSDisk.Sku.Name
+DiskCategory = if($OSDisk.Sku.Name -match “Premium”) {“Premium SSD”} else {“Standard SSD/HDD”}
+}
+
+foreach($Disk in $VM.StorageProfile.DataDisks){
+
+$DiskInfo = Get-AzDisk -ResourceGroupName $RGName
+-DiskName $Disk.Name
+
+[PSCustomObject]@{
+VMName = $VM.Name
+VMSize = $VM.HardwareProfile.VmSize
+DiskName = $DiskInfo.Name
+DiskSizeGB = $DiskInfo.DiskSizeGB
+DiskType = $DiskInfo.Sku.Name
+DiskCategory = if($DiskInfo.Sku.Name -match “Premium”) {“Premium SSD”} else {“Standard SSD/HDD”}
+}
+
+}
+
+} | Format-Table -AutoSize
