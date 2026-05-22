@@ -171,3 +171,35 @@ DiskCategory = if($DiskInfo.Sku.Name -match “Premium”) {“Premium SSD”} e
 }
 
 } | Format-Table -AutoSize
+
+
+
+
+
+
+
+
+
+
+
+
+
+$RGName = "Your-ResourceGroup-Name"
+
+Get-AzVM -ResourceGroupName $RGName | ForEach-Object {
+
+$VM = $_
+
+$OSDisk = Get-AzDisk -ResourceGroupName $RGName -DiskName $VM.StorageProfile.OSDisk.Name
+
+[PSCustomObject]@{
+VMName = $VM.Name
+VMSize = $VM.HardwareProfile.VmSize
+DiskName = $OSDisk.Name
+DiskSizeGB = $OSDisk.DiskSizeGB
+DiskType = $OSDisk.Sku.Name
+Location = $VM.Location
+}
+
+} | Export-Csv "./AVD_VM_Disk_Report.csv" -NoTypeInformation
+
