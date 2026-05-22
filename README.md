@@ -1,61 +1,9 @@
-param (
-    [string]$VMName,
-    [string]$ResourceGroup
-)
+Hi Team,
 
-Connect-AzAccount -Identity
+We need support regarding the SR correlation process.
+Earlier, we used to loop in the Technology Service Desk team to get the SR correlated and assigned to the System Engineering team.
 
-$ScriptBlock = @'
+Now, we have been informed about a different process.
+Could you please help us with the correct process/team for SR correlation and assignment?
 
-$Days = -10
-
-$Paths = @(
-    "C:\Windows\Installer",
-    "C:\Windows\Temp"
-)
-
-foreach ($Path in $Paths) {
-
-    if (Test-Path $Path) {
-
-        Get-ChildItem $Path -Recurse -Force -ErrorAction SilentlyContinue |
-        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays($Days) } |
-        ForEach-Object {
-
-            try {
-                Remove-Item $_.FullName -Recurse -Force -ErrorAction Stop
-            }
-            catch {}
-        }
-    }
-}
-
-Get-ChildItem "C:\Users" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-
-    $UserTemp = "$($_.FullName)\AppData\Local\Temp"
-
-    if (Test-Path $UserTemp) {
-
-        Get-ChildItem $UserTemp -Recurse -Force -ErrorAction SilentlyContinue |
-        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays($Days) } |
-        ForEach-Object {
-
-            try {
-                Remove-Item $_.FullName -Recurse -Force -ErrorAction Stop
-            }
-            catch {}
-        }
-    }
-}
-
-DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase /Quiet
-
-Get-PSDrive C
-
-'@
-
-Invoke-AzVMRunCommand `
-    -ResourceGroupName $ResourceGroup `
-    -VMName $VMName `
-    -CommandId "RunPowerShellScript" `
-    -ScriptString $ScriptBlock
+Your support will be appreciated.
