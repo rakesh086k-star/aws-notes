@@ -71,3 +71,15 @@ Benefits:
 	•	Enables proactive infrastructure management
 
 
+
+
+Monitoring Agent Auto-Deployment via Azure Policy
+
+Implemented Azure Policy-based automation to automatically install the monitoring agent on all newly created AVD session hosts.
+
+Benefits:
+	•	Ensures consistent monitoring across all VMs
+	•	Eliminates manual agent installation effort
+	•	Improves compliance and monitoring coverage
+	•	Enables faster onboarding of new session hosts
+
