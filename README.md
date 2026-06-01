@@ -19,17 +19,27 @@ foreach ($VM in $VMs)
         $_.Code -like "PowerState/*"
     }).DisplayStatus
 
-    if ($PowerState -eq "VM running")
+    if ($PowerState -ne "VM running")
     {
-        Write-Output "$VM : Already Running"
+        Write-Output "$VM : VM Not Running - Skipped"
+        continue
+    }
+
+    # User Session Check Here
+
+    $ActiveUsers = 0
+
+    if ($ActiveUsers -gt 0)
+    {
+        Write-Output "$VM : User Logged In - Restart Skipped"
     }
     else
     {
-        Start-AzVM `
+        Restart-AzVM `
             -ResourceGroupName $ResourceGroup `
             -Name $VM `
             -NoWait
 
-        Write-Output "$VM : Start Request Submitted"
+        Write-Output "$VM : Restart Initiated"
     }
 }
