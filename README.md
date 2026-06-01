@@ -3,9 +3,9 @@ Connect-AzAccount -Identity
 # VM Resource Group
 $VMResourceGroup = "RG-AVD-Convex-EI-Uk"
 
-# AVD Host Pool Details
+# Host Pool Details
+$HostPoolRG = "Your-HostPool-RG"
 $HostPoolName = "Your-HostPool-Name"
-$HostPoolResourceGroup = "Your-HostPool-RG"
 
 # VM List
 $VMs = @(
@@ -16,33 +16,35 @@ $VMs = @(
 
 foreach ($VM in $VMs)
 {
-    Write-Output "----------------------------------------"
+    Write-Output "-------------------------------------"
     Write-Output "Checking VM: $VM"
-
-    # Check VM Power State
-    $VMStatus = Get-AzVM `
-        -ResourceGroupName $VMResourceGroup `
-        -Name $VM `
-        -Status
-
-    $PowerState = ($VMStatus.Statuses | Where-Object {
-        $_.Code -like "PowerState/*"
-    }).DisplayStatus
-
-    if ($PowerState -ne "VM running")
-    {
-        Write-Output "$VM : VM is not running - Skipped"
-        continue
-    }
 
     try
     {
-        # Find session host related to VM
+        # Check Power State
+        $VMStatus = Get-AzVM `
+            -ResourceGroupName $VMResourceGroup `
+            -Name $VM `
+            -Status
+
+        $PowerState = ($VMStatus.Statuses |
+            Where-Object {$_.Code -like "PowerState/*"} |
+            Select-Object -ExpandProperty Code)
+
+        Write-Output "Power State: $PowerState"
+
+        if ($PowerState -ne "PowerState/running")
+        {
+            Write-Output "$VM : VM is Stopped/Deallocated - Skipped"
+            continue
+        }
+
+        # Find Session Host
         $SessionHost = Get-AzWvdSessionHost `
-            -ResourceGroupName $HostPoolResourceGroup `
+            -ResourceGroupName $HostPoolRG `
             -HostPoolName $HostPoolName |
             Where-Object {
-                $_.Name -like "*$VM*"
+                $_.Name -match $VM
             }
 
         if (-not $SessionHost)
@@ -51,26 +53,29 @@ foreach ($VM in $VMs)
             continue
         }
 
+        $SessionHostName = $SessionHost.Name.Split("/")[-1]
+
         # Get User Sessions
         $Sessions = Get-AzWvdUserSession `
-            -ResourceGroupName $HostPoolResourceGroup `
+            -ResourceGroupName $HostPoolRG `
             -HostPoolName $HostPoolName `
-            -SessionHostName ($SessionHost.Name.Split('/')[-1])
+            -SessionHostName $SessionHostName `
+            -ErrorAction SilentlyContinue
 
-        if ($Sessions.Count -gt 0)
+        if ($Sessions -and $Sessions.Count -gt 0)
         {
-            Write-Output "$VM : User Session Exists (Active or Disconnected) - Restart Skipped"
+            Write-Output "$VM : User Session Found - Restart Skipped"
 
             foreach ($Session in $Sessions)
             {
                 Write-Output "User: $($Session.UserPrincipalName)"
-                Write-Output "Session State: $($Session.SessionState)"
+                Write-Output "State: $($Session.SessionState)"
             }
 
             continue
         }
 
-        Write-Output "$VM : No User Session Found - Restarting VM"
+        Write-Output "$VM : No User Session Found"
 
         Restart-AzVM `
             -ResourceGroupName $VMResourceGroup `
@@ -81,6 +86,7 @@ foreach ($VM in $VMs)
     }
     catch
     {
-        Write-Output "$VM : Error - $($_.Exception.Message)"
+        Write-Output "$VM : Error"
+        Write-Output $_.Exception.Message
     }
 }
