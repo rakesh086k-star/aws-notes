@@ -1,5 +1,7 @@
-Get-AzWvdUserSession `
+Connect-AzAccount -Identity
+
+$Sessions = Get-AzWvdUserSession `
 -ResourceGroupName "RG-AVD-Convex-EI-Uk" `
--HostPoolName "AHP_Convex_UK_EI_Dedicated" |
-Where-Object { $_.Name -match "AZEIEUWCOD-606" } |
-Format-List *
+-HostPoolName "AHP_Convex_UK_EI_Dedicated"
+
+$Sessions | Select-Object Name,SessionState
