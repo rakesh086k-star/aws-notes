@@ -1,14 +1,19 @@
 Connect-AzAccount -Identity
 
-$ResourceGroup = "RG-AVD"
+$ResourceGroup = "RG-AVD-Convex-EI-Uk"
 
 $VMs = @(
-    "AVD-VM01",
-    "AVD-VM02",
-    "AVD-VM03"
+    "AZEIEUWCOD-16",
+    "AZEIEUWCOD-163",
+    "AZEIEUWCOD-175"
 )
 
 foreach ($VM in $VMs)
 {
-    Start-AzVM -ResourceGroupName $ResourceGroup -Name $VM
+    Start-AzVM `
+        -ResourceGroupName $ResourceGroup `
+        -Name $VM `
+        -NoWait
+
+    Write-Output "Start request submitted for $VM"
 }
