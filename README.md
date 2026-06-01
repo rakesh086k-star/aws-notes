@@ -75,4 +75,4 @@ foreach ($VM in $VMs)
         -NoWait
 
     Write-Output "$VM : Restart Request Submitted"
-}
+} 
