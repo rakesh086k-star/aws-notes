@@ -10,10 +10,26 @@ $VMs = @(
 
 foreach ($VM in $VMs)
 {
-    Start-AzVM `
+    $VMStatus = Get-AzVM `
         -ResourceGroupName $ResourceGroup `
         -Name $VM `
-        -NoWait
+        -Status
 
-    Write-Output "Start request submitted for $VM"
+    $PowerState = ($VMStatus.Statuses | Where-Object {
+        $_.Code -like "PowerState/*"
+    }).DisplayStatus
+
+    if ($PowerState -eq "VM running")
+    {
+        Write-Output "$VM : Already Running"
+    }
+    else
+    {
+        Start-AzVM `
+            -ResourceGroupName $ResourceGroup `
+            -Name $VM `
+            -NoWait
+
+        Write-Output "$VM : Start Request Submitted"
+    }
 }
