@@ -1,50 +1,12 @@
-Connect-AzAccount -Identity
+Hi Bharat,
 
-$VMResourceGroup = "RG-AVD-Convex-EI-Uk"
-$HostPoolName = "AHP_Convex_UK_EI_Dedicated"
+Thanks for sharing this email.
 
-$VMs = @(
-    "AZEIEUWCOD-16",
-    "AZEIEUWCOD-163",
-    "AZEIEUWCOD-175",
-    "AZEIEUWCOD-606"
-)
+I have reviewed it. This activity is related to Azure VPN Gateway and seems to be under the Network team's scope.
 
-foreach ($VM in $VMs)
-{
-    # Check VM Power State
-    $PowerState = (
-        Get-AzVM -ResourceGroupName $VMResourceGroup -Name $VM -Status
-    ).Statuses |
-    Where-Object { $_.Code -eq "PowerState/running" }
+I will check with the Network team to confirm whether the migration is already completed or still pending and if there is any impact on the AVD environment.
 
-    if (-not $PowerState)
-    {
-        Write-Output "$VM : VM Stopped - Skipped"
-        continue
-    }
+I will update you once I get confirmation.
 
-    # Check Active/Disconnected Sessions
-    $Session = Get-AzWvdUserSession `
-        -ResourceGroupName $VMResourceGroup `
-        -HostPoolName $HostPoolName |
-        Where-Object {
-            $_.Name -match $VM
-        }
-
-    if ($Session)
-    {
-        Write-Output "$VM : Session Found [$($Session.SessionState)] - Skipped"
-        continue
-    }
-
-    # No Session Found
-    Write-Output "$VM : No Session Found - Restarting"
-
-    Restart-AzVM `
-        -ResourceGroupName $VMResourceGroup `
-        -Name $VM `
-        -NoWait
-
-    Write-Output "$VM : Restart Request Submitted"
-}
+Regards,
+Rakesh
