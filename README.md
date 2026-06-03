@@ -1,3 +1,9 @@
-Get-AzAutomationScheduledRunbook `
+$Error.Clear()
+
+Remove-AzAutomationSchedule `
 -ResourceGroupName "RG-AVD-Convex" `
--AutomationAccountName "Automate-AVD-Convex"
+-AutomationAccountName "Automate-AVD-Convex" `
+-Name "AVD_Start_Convex" `
+-Force
+
+$Error[0] | Format-List * -Force
