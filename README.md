@@ -87,3 +87,28 @@ OS version information is available centrally, enabling faster validation and re
 Cost Impact
 
 Reduced administrative effort and improved compliance tracking.
+
+
+Initiative
+Benefits
+Before
+After
+Cost / Ops Impact
+AVD Health Check Dashboard
+Provides a quick view of AVD health, unavailable session hosts, and stuck sessions. Enables proactive monitoring and faster issue identification.
+Engineers had to manually check multiple session hosts to identify unhealthy or unavailable machines.
+A single-click report provides complete AVD health status and helps engineers quickly target affected machines.
+Reduces daily monitoring effort and improves incident response time.
+Automatic Azure Monitor Agent (AMA) Installation
+Ensures all newly created machines are automatically onboarded for monitoring. Improves monitoring coverage and compliance.
+Engineers had to manually verify and install monitoring agents on new machines.
+AMA is automatically installed when a new machine is added, ensuring consistent monitoring.
+Reduces manual effort and minimizes the risk of unmonitored machines.
+FSLogix Profile Cleanup Automation
+Identifies and removes inactive user profiles to optimize storage utilization. Helps maintain a clean environment.
+Inactive user profiles remained in storage, increasing storage consumption and costs.
+Unused FSLogix profiles can be identified and cleaned up efficiently, reducing unnecessary storage usage.
+Optimizes storage costs and improves storage management efficiency.
+
+
+
