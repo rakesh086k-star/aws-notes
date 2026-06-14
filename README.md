@@ -1,1 +1,1 @@
-az vm list -g RG-AVD-LISS-IN-UK --query "[].{VM:name,Size:hardwareProfile.vmSize}" -o table
+The purchased reservation appears to be for Standard_D8s_v4, whereas the current VM consumption is primarily against D8s_v5 and D16s_v5 meters. Further validation is required to confirm whether the reservation benefit is being applied to the current VM sizes through instance size flexibility or whether there is a reservation coverage gap.”
