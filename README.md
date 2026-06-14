@@ -1,1 +1,2 @@
-Get-AzResourceGroup | Where-Object {$_.ResourceGroupName -like "*name*"}
+Get-AzReservation |
+Select-Object DisplayName, AppliedScopeType, ProvisioningState
