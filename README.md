@@ -1,1 +1,7 @@
-The purchased reservation appears to be for Standard_D8s_v4, whereas the current VM consumption is primarily against D8s_v5 and D16s_v5 meters. Further validation is required to confirm whether the reservation benefit is being applied to the current VM sizes through instance size flexibility or whether there is a reservation coverage gap.”
+Hi Team,
+
+We have reserved Azure instances for v4 SKU, but our current VMs are running on v5 upgraded family.
+
+Can you please confirm if this mismatch will cause any billing or performance impact?
+
+Please advise if any action is needed from our side.
