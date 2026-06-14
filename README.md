@@ -1,2 +1,1 @@
-Get-AzReservation |
-Select-Object DisplayName, AppliedScopeType, ProvisioningState
+az vm list -g RG-AVD-LISS-IN-UK --query "[].{VM:name,Size:hardwareProfile.vmSize}" -o table
