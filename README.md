@@ -1,6 +1,5 @@
-Get-AzReservation |
-ForEach-Object {
-    Get-AzReservationSummary `
-        -ReservationOrderId $_.ReservationOrderId `
-        -ReservationId $_.Id
-}
+$VMs = Get-AzVM -ResourceGroupName "RG-Name"
+
+$VMs | Select-Object Name,
+@{N="VMSize";E={$_.HardwareProfile.VmSize}},
+Location
