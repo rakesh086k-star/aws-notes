@@ -20,9 +20,7 @@ toscalar(
     | summarize dcount(SessionHostName)
 );
 
-datatable (Metric:string, Count:long)
-[
-"Active Users", ActiveUsers,
-"Disconnected Sessions", DisconnectedSessions,
-"Idle Sessions", IdleSessions
-]
+print
+    ActiveUsers = ActiveUsers,
+    DisconnectedSessions = DisconnectedSessions,
+    IdleSessions = IdleSessions
