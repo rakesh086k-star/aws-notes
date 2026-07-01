@@ -1,52 +1,28 @@
-WVDConnections
-| where TimeGenerated > ago(24h)
-| where State == "Connected"
-| summarize ActiveUsers = dcount(UserName)
+let ActiveUsers =
+toscalar(
+    WVDConnections
+    | where TimeGenerated > ago(24h)
+    | summarize dcount(UserName)
+);
 
+let DisconnectedSessions =
+toscalar(
+    WVDCheckpoints
+    | where TimeGenerated > ago(24h)
+    | where Name contains "Disconnected"
+    | summarize count()
+);
 
-WVDConnections
-| where TimeGenerated > ago(24h)
-| summarize ActiveUsers = dcount(UserName)
+let IdleSessions =
+toscalar(
+    WVDAgentHealthStatus
+    | where TimeGenerated > ago(15m)
+    | summarize dcount(SessionHostName)
+);
 
-
-WVDConnections
-| where TimeGenerated > ago(24h)
-| where State == "Disconnected"
-| summarize DisconnectedSessions = count()
-
-WVDCheckpoints
-| where TimeGenerated > ago(24h)
-| where Name contains "Disconnected"
-| summarize DisconnectedSessions = count()
-
-WVDAgentHealthStatus
-| where TimeGenerated > ago(15m)
-| where SessionState == "Idle"
-| summarize IdleSessions = count()
-
-
-
-WVDAgentHealthStatus
-| where TimeGenerated > ago(15m)
-| summarize IdleSessions = dcount(SessionHostName)
-
-let Active =
-WVDConnections
-| where TimeGenerated > ago(24h)
-| where State == "Connected"
-| summarize Value=dcount(UserName)
-| extend Metric="Active Users";
-
-let Disconnected =
-WVDConnections
-| where TimeGenerated > ago(24h)
-| where State == "Disconnected"
-| summarize Value=count()
-| extend Metric="Disconnected";
-
-union Active, Disconnected
-
-
-
-
-
+datatable (Metric:string, Count:long)
+[
+"Active Users", ActiveUsers,
+"Disconnected Sessions", DisconnectedSessions,
+"Idle Sessions", IdleSessions
+]
