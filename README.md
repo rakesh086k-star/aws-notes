@@ -1,1 +1,9 @@
-As per your feedback, I have incorporated the suggested changes and refined the AVD Health & Governance Dashboard. Please review the updated dashboard and let me know if any additional enhancements or monitoring parameters should be included.
+Get-AppxPackage -AllUsers *Handwriting* | Remove-AppxPackage
+
+
+
+Get-AppxProvisionedPackage -Online |
+Where-Object DisplayName -like "*Handwriting*" |
+Remove-AppxProvisionedPackage -Online
+
+
