@@ -42,5 +42,11 @@ WVDConnections
 | order by TotalConnections desc
 
 
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| project TimeGenerated, UserName, GatewayRegion, SessionHostName
+| order by TimeGenerated desc
+
+
 
 
