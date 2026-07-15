@@ -1,4 +1,4 @@
-Ji Get-AppxPackage -AllUsers *Handwriting* | Remove-AppxPackage
+hu Ji Get-AppxPackage -AllUsers *Handwriting* | Remove-AppxPackage
 
 
 
@@ -279,6 +279,13 @@ by
     City,
     ClientIPAddress
 | order by UserName asc
+
+
+
+WVDConnections
+| where TimeGenerated >= ago(7d)
+| summarize Users = dcount(UserName) by ClientType, ClientVersion
+| order by ClientType asc, ClientVersion desc
 
 
 
