@@ -294,3 +294,25 @@ WVDConnections
 | summarize Users = dcount(UserName) by ClientType, ClientVersion
 | order by ClientType asc, ClientVersion desc
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(7d)
+| summarize arg_max(TimeGenerated, *) by UserName
+| extend AccessMethod = case(
+    ClientType contains "web", "Web Browser",
+    ClientType contains "msrdc", "Windows App",
+    ClientType contains "msrdcx", "Windows App",
+    ClientType contains "android", "Windows App (Android)",
+    ClientType contains "ios", "Windows App (iOS)",
+    ClientType contains "mac", "Windows App (macOS)",
+    ClientType
+)
+| project
+    UserName,
+    AccessMethod,
+    ClientVersion,
+    ClientOS,
+    TimeGenerated
+| order by UserName asc
+
