@@ -1,4 +1,4 @@
-Get-AppxPackage -AllUsers *Handwriting* | Remove-AppxPackage
+Ji Get-AppxPackage -AllUsers *Handwriting* | Remove-AppxPackage
 
 
 
@@ -173,5 +173,11 @@ WVDConnections
     City = tostring(Geo.city)
 | take 20
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| project UserName, ClientIPAddress
+| take 20
 
 
