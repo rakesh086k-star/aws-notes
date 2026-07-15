@@ -194,3 +194,44 @@ WVDConnections
     ClientIPAddress
 | order by UserName asc
 
+
+
+
+
+
+
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+    | summarize arg_max(TimeGenerated, *) by UserName
+    | extend Geo = geo_info_from_ip_address(ClientIPAddress)
+    | extend Country = tostring(Geo.country),
+             City = tostring(Geo.city)
+    | project
+        CorrelationId,
+        UserName,
+        SessionHostName,
+        GatewayRegion,
+        Country,
+        City,
+        ClientIPAddress,
+        ClientType
+) on CorrelationId
+| summarize
+    ["Avg RTT"] = strcat(round(avg(EstRoundTripTimeInMs),0), " ms"),
+    ["Max RTT"] = strcat(round(max(EstRoundTripTimeInMs),0), " ms"),
+    ["Avg Bandwidth"] = strcat(round(avg(EstAvailableBandwidthKBps)/1024.0,2), " MB/s"),
+    ["Max Bandwidth"] = strcat(round(max(EstAvailableBandwidthKBps)/1024.0,2), " MB/s")
+by
+    UserName,
+    SessionHostName,
+    GatewayRegion,
+    Country,
+    City,
+    ClientIPAddress,
+    ClientType
+| order by UserName asc
+
+
