@@ -181,3 +181,16 @@ WVDConnections
 | take 20
 
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| summarize arg_max(TimeGenerated, *) by UserName
+| extend Geo = geo_info_from_ip_address(ClientIPAddress)
+| project
+    UserName,
+    Country = tostring(Geo.country),
+    City = tostring(Geo.city),
+    ClientIPAddress
+| order by UserName asc
+
