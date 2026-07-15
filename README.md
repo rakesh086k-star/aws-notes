@@ -235,3 +235,48 @@ by
 | order by UserName asc
 
 
+
+
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+    | summarize arg_max(TimeGenerated, *) by UserName
+    | extend Geo = geo_info_from_ip_address(ClientIPAddress)
+    | extend Country = tostring(Geo.country),
+             City = tostring(Geo.city)
+    | extend AccessMethod = case(
+        ClientType contains "web", "Web Browser",
+        ClientType contains "msrdcx64", "Windows App",
+        ClientType contains "msrdc", "Remote Desktop",
+        ClientType contains "android", "Android App",
+        ClientType contains "ios", "iOS App",
+        ClientType contains "mac", "macOS App",
+        ClientType
+    )
+    | project
+        CorrelationId,
+        UserName,
+        AccessMethod,
+        ClientVersion,
+        GatewayRegion,
+        Country,
+        City,
+        ClientIPAddress
+) on CorrelationId
+| summarize
+    ["Avg RTT"] = strcat(round(avg(EstRoundTripTimeInMs),0), " ms"),
+    ["Max RTT"] = strcat(round(max(EstRoundTripTimeInMs),0), " ms"),
+    ["Avg Bandwidth"] = strcat(round(avg(EstAvailableBandwidthKBps)/1024.0,2), " MB/s"),
+    ["Max Bandwidth"] = strcat(round(max(EstAvailableBandwidthKBps)/1024.0,2), " MB/s")
+by
+    UserName,
+    AccessMethod,
+    ClientVersion,
+    GatewayRegion,
+    Country,
+    City,
+    ClientIPAddress
+| order by UserName asc
+
