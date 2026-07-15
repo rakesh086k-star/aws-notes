@@ -149,3 +149,13 @@ by UserName, GatewayRegion, SessionHostName
 | order by UserName asc
 
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(1d)
+| extend Geo = geo_info_from_ip_address(ClientIPAddress)
+| project UserName, ClientIPAddress,
+          Country = tostring(Geo.country),
+          City = tostring(Geo.city)
+| take 10
+
