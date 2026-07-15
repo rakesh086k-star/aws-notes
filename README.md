@@ -159,3 +159,19 @@ WVDConnections
           City = tostring(Geo.city)
 | take 10
 
+
+
+
+
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| extend Geo = geo_info_from_ip_address(ClientIPAddress)
+| project
+    UserName,
+    ClientIPAddress,
+    Country = tostring(Geo.country),
+    City = tostring(Geo.city)
+| take 20
+
+
+
