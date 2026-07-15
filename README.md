@@ -81,5 +81,20 @@ by UserName, GatewayRegion, SessionHostName
 
 
 
+WVDConnectionNetworkData
+| where TimeGenerated > ago(1d)
+| summarize
+    AvgRTT = round(avg(EstRoundTripTimeInMs)),
+    AvgBandwidth = round(avg(EstAvailableBandwidthKbps))
+by CorrelationId
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected"
+    | summarize arg_max(TimeGenerated, *) by UserName
+) on CorrelationId
+| project UserName, GatewayRegion, SessionHostName, AvgRTT, AvgBandwidth
+
+
+
 
 
