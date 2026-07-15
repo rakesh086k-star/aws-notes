@@ -96,5 +96,17 @@ by CorrelationId
 
 
 
-
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+) on CorrelationId
+| summarize
+    AvgRTT = round(avg(EstRoundTripTimeInMs),0),
+    AvgBandwidth = round(avg(EstAvailableBandwidthKBps),0),
+    MaxRTT = max(EstRoundTripTimeInMs),
+    MaxBandwidth = max(EstAvailableBandwidthKBps)
+by UserName, GatewayRegion, SessionHostName
+| order by AvgRTT desc
 
