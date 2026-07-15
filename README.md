@@ -316,3 +316,54 @@ WVDConnections
     TimeGenerated
 | order by UserName asc
 
+
+
+
+
+
+
+
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+    | summarize arg_max(TimeGenerated, *) by UserName
+    | extend Geo = geo_info_from_ip_address(ClientIPAddress)
+    | extend Country = tostring(Geo.country),
+             City = tostring(Geo.city)
+    | extend AccessMethod = case(
+        ClientType contains "web", "Web Browser",
+        ClientType contains "msrdc", "Windows App",
+        ClientType contains "msrdcx", "Windows App",
+        ClientType contains "android", "Windows App (Android)",
+        ClientType contains "ios", "Windows App (iOS)",
+        ClientType contains "mac", "Windows App (macOS)",
+        "Other"
+    )
+    | project
+        CorrelationId,
+        UserName,
+        AccessMethod,
+        ClientVersion,
+        GatewayRegion,
+        Country,
+        City,
+        ClientIPAddress
+) on CorrelationId
+| summarize
+    AvgRTT = round(avg(EstRoundTripTimeInMs),0),
+    MaxRTT = round(max(EstRoundTripTimeInMs),0),
+    AvgBandwidth = round(avg(EstAvailableBandwidthKBps)/1024.0,2),
+    MaxBandwidth = round(max(EstAvailableBandwidthKBps)/1024.0,2)
+by
+    UserName,
+    AccessMethod,
+    ClientVersion,
+    GatewayRegion,
+    Country,
+    City,
+    ClientIPAddress
+| order by AvgRTT desc
+
+
