@@ -36,4 +36,11 @@ WVDConnections
 | summarize Users = dcount(UserName) by Country
 | order by Users desc
 
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| summarize TotalConnections = count() by GatewayRegion
+| order by TotalConnections desc
+
+
+
 
