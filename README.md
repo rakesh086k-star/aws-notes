@@ -23,3 +23,8 @@ Resources
 | where resourceGroup == "RG-AVD-WRR-E1-US"
 | summarize Count=count() by PowerState=tostring(properties.extended.instanceView.powerState.code)
 
+
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| summarize Sessions = count() by GatewayRegion
+
