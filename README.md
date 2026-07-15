@@ -7,6 +7,17 @@ Where-Object DisplayName -like "*Handwriting*" |
 Remove-AppxProvisionedPackage -Online
 
 
+
+search *
+| summarize Count=count() by $table
+| sort by $table asc
+
+
+union withsource=TableName *
+| summarize Count=count() by TableName
+| sort by TableName asc
+
+
 Resources
 | where type =~ "microsoft.compute/virtualMachines"
 | where resourceGroup == "RG-AVD-WRR-E1-US"
