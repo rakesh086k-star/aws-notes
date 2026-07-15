@@ -49,4 +49,12 @@ WVDConnections
 
 
 
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| summarize arg_max(TimeGenerated, *) by UserName
+| project TimeGenerated, UserName, GatewayRegion, SessionHostName
+| order by TimeGenerated desc
+
+
+
 
