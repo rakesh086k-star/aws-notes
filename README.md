@@ -28,3 +28,12 @@ WVDConnections
 | where TimeGenerated >= ago(24h)
 | summarize Sessions = count() by GatewayRegion
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| extend Country = geo_info_from_ip_address(ClientIPAddress).country
+| summarize Users = dcount(UserName) by Country
+| order by Users desc
+
+
