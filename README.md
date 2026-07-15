@@ -130,3 +130,22 @@ by UserName
 | order by todouble(split(['Avg. RTT'], " ")[0]) desc
 
 
+
+
+
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+    | project CorrelationId, UserName, GatewayRegion, SessionHostName
+) on CorrelationId
+| summarize
+    ["Avg. RTT"] = strcat(round(avg(EstRoundTripTimeInMs),0), " ms"),
+    ["Max. RTT"] = strcat(max(EstRoundTripTimeInMs), " ms"),
+    ["Avg. Bandwidth"] = strcat(round(avg(EstAvailableBandwidthKBps)/1024.0,2), " MB/s"),
+    ["Max. Bandwidth"] = strcat(round(max(EstAvailableBandwidthKBps)/1024.0,2), " MB/s")
+by UserName, GatewayRegion, SessionHostName
+| order by UserName asc
+
+
