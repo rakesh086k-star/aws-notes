@@ -110,3 +110,23 @@ WVDConnectionNetworkData
 by UserName, GatewayRegion, SessionHostName
 | order by AvgRTT desc
 
+
+
+
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(1d)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected" and UserName != ""
+) on CorrelationId
+| summarize
+    ["Avg. RTT"] = strcat(round(avg(EstRoundTripTimeInMs),0), " ms"),
+    ["Max. RTT"] = strcat(max(EstRoundTripTimeInMs), " ms"),
+    ["P90 RTT"] = strcat(round(percentile(EstRoundTripTimeInMs,90),0), " ms"),
+    ["Avg. Bandwidth"] = strcat(round(avg(EstAvailableBandwidthKBps)/1024.0,2), " MB/s"),
+    ["Max. Bandwidth"] = strcat(round(max(EstAvailableBandwidthKBps)/1024.0,2), " MB/s"),
+    ["P90 Bandwidth"] = strcat(round(percentile(EstAvailableBandwidthKBps,90)/1024.0,2), " MB/s")
+by UserName
+| order by todouble(split(['Avg. RTT'], " ")[0]) desc
+
+
