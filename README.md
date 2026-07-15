@@ -280,3 +280,10 @@ by
     ClientIPAddress
 | order by UserName asc
 
+
+
+WVDConnections
+| where TimeGenerated >= ago(7d)
+| summarize Users = dcount(UserName) by ClientType, ClientVersion
+| order by ClientType asc, ClientVersion desc
+
