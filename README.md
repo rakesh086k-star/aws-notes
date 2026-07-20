@@ -379,6 +379,10 @@ az account show --output table
 az account list --all --output table
 
 
+az account set --subscription "<Subscription Name या Subscription ID>"
+
+
+
 
 
 
