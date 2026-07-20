@@ -371,4 +371,11 @@ by
 
 az vm list --resource-group "RG-AVD-LISS-IN-UK" --query "[].{Name:name,Size:hardwareProfile.vmSize}" --output table
 
+az vm list -g "RG-AVD-LISS-IN-UK" --show-details --query "[].{VMName:name,ComputeSize:hardwareProfile.vmSize}" -o table
+
+
+az account show --output table
+
+
+
 
