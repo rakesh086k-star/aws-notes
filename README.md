@@ -376,6 +376,11 @@ az vm list -g "RG-AVD-LISS-IN-UK" --show-details --query "[].{VMName:name,Comput
 
 az account show --output table
 
+az account list --all --output table
+
+
+
+
 
 
 
