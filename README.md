@@ -367,3 +367,8 @@ by
 | order by AvgRTT desc
 
 
+
+
+az vm list --resource-group "RG-AVD-LISS-IN-UK" --query "[].{Name:name,Size:hardwareProfile.vmSize}" --output table
+
+
