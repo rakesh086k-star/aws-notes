@@ -441,3 +441,20 @@ WVDConnections
 
 
 
+
+
+
+
+WVDConnections
+| where TimeGenerated >= ago(1d)
+| summarize arg_max(TimeGenerated, *) by UserName
+| extend AccessMethod = case(
+    ClientType contains "web", "Web Browser",
+    ClientType contains "msrdc" or ClientType contains "msrdcx", "Windows App",
+    ClientType contains "android", "Windows App (Android)",
+    ClientType contains "ios", "Windows App (iOS)",
+    ClientType contains "mac", "Windows App (macOS)",
+    "Other"
+)
+| summarize Users = count() by AccessMethod, ClientVersion
+| order by AccessMethod asc, Users desc
