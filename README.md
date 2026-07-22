@@ -458,3 +458,35 @@ WVDConnections
 )
 | summarize Users = count() by AccessMethod, ClientVersion
 | order by AccessMethod asc, Users desc
+
+
+
+
+
+
+
+
+
+
+let UserData =
+WVDConnections
+| where TimeGenerated >= ago(1d)
+| summarize arg_max(TimeGenerated, *) by UserName
+| extend AccessMethod = case(
+    ClientType contains "web", "Web Browser",
+    ClientType contains "msrdc" or ClientType contains "msrdcx", "Windows App",
+    ClientType contains "android", "Windows App (Android)",
+    ClientType contains "ios", "Windows App (iOS)",
+    ClientType contains "mac", "Windows App (macOS)",
+    "Other"
+);
+
+let TotalUsers = toscalar(
+    UserData
+    | summarize dcount(UserName)
+);
+
+UserData
+| summarize Users = dcount(UserName) by AccessMethod, ClientVersion
+| extend Percentage = strcat(round((todouble(Users) * 100.0) / TotalUsers, 1), "%")
+| order by Users desc
