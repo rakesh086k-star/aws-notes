@@ -403,7 +403,11 @@ foreach ($vnet in $vnets)
 
 
 
+Connect-AzAccount -Identity
 
+Write-Output "Login Successful"
+
+Get-AzContext
 
 
 
