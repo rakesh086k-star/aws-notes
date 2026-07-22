@@ -410,4 +410,10 @@ Write-Output "Login Successful"
 Get-AzContext
 
 
+Connect-AzAccount -Identity
+
+Get-AzVirtualNetwork
+
+
+
 
