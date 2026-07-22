@@ -383,6 +383,25 @@ az account set --subscription "<Subscription Name या Subscription ID>"
 
 
 
+Connect-AzAccount -Identity
+
+$vnets = Get-AzVirtualNetwork
+
+foreach ($vnet in $vnets)
+{
+    foreach ($subnet in $vnet.Subnets)
+    {
+        $usedIPs = ($subnet.IpConfigurations).Count
+
+        Write-Output "VNet : $($vnet.Name)"
+        Write-Output "Subnet : $($subnet.Name)"
+        Write-Output "Address Prefix : $($subnet.AddressPrefix)"
+        Write-Output "Used IP : $usedIPs"
+    }
+}
+
+
+
 
 
 
