@@ -417,3 +417,27 @@ Get-AzVirtualNetwork
 
 
 
+let TotalUsers =
+WVDConnections
+| where TimeGenerated >= ago(1d)
+| summarize dcount(UserName);
+
+WVDConnections
+| where TimeGenerated >= ago(1d)
+| summarize arg_max(TimeGenerated, *) by UserName
+| extend AccessMethod = case(
+    ClientType contains "web", "Web Browser",
+    ClientType contains "msrdc", "Windows App",
+    ClientType contains "msrdcx", "Windows App",
+    ClientType contains "android", "Windows App (Android)",
+    ClientType contains "ios", "Windows App (iOS)",
+    ClientType contains "mac", "Windows App (macOS)",
+    "Other"
+)
+| summarize Users = dcount(UserName) by AccessMethod, ClientVersion
+| extend Percentage = round((todouble(Users) / TotalUsers) * 100, 1)
+| order by Users desc
+
+
+
+
