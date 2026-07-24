@@ -490,3 +490,12 @@ UserData
 | summarize Users = dcount(UserName) by AccessMethod, ClientVersion
 | extend Percentage = strcat(round((todouble(Users) * 100.0) / TotalUsers, 1), "%")
 | order by Users desc
+
+
+
+
+
+
+
+Add-AppProvisionedAppxPackage -Online -PackagePath "C:\Temp\Application.msix" -SkipLicense
+
