@@ -505,3 +505,65 @@ DISM /Online /Add-ProvisionedAppxPackage /PackagePath:"C:\Temp\Application.msix"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+WVDConnections
+| project UserName, SessionHostName, CorrelationId
+| join kind=inner (
+    WVDErrors
+    | project CorrelationId, Code=tostring(Code), Message
+) on CorrelationId
+| summarize
+    ErrorCount = count(),
+    SampleMessage = any(Message)
+    by SessionHostName, UserName, Code
+| extend ErrorCategory = case(
+    Code in ("3076","2055"), "🌐 Client Network",
+    Code == "-2147467259", "❌ Session Host",
+    Code == "516", "⚠️ AVD Connectivity",
+    Code == "90", "🌐 Client Network",
+    Code == "68", "🔌 Connection",
+    Code == "27396", "🖥️ Session",
+    Code == "50331694", "🌐 Client Network",
+    "❓ Unknown"
+)
+| extend ErrorDescription = case(
+    Code == "-2147467259", "Unexpected system error on the session host.",
+    Code == "516", "Unable to connect to Azure Virtual Desktop service.",
+    Code == "90", "Session host lost connection to the client.",
+    Code == "68", "Connection terminated unexpectedly.",
+    Code == "27396", "User session disconnected unexpectedly.",
+    Code == "50331694", "Client network interruption detected.",
+    Code in ("3076","2055"), "Client network issue detected.",
+    SampleMessage
+)
+| extend RecommendedAction = case(
+    Code == "-2147467259", "Check VM health, AVD Agent, FSLogix and Event Viewer.",
+    Code == "516", "Verify Azure connectivity, DNS, Firewall and AVD service.",
+    Code == "90", "Check client internet, VPN or Wi-Fi connection.",
+    Code == "68", "Review Event Viewer and session logs.",
+    Code == "27396", "Check session host health and user sign-in logs.",
+    Code == "50331694", "Verify ISP, VPN and client network stability.",
+    Code in ("3076","2055"), "Check client network connectivity.",
+    "Investigate the Sample Message."
+)
+| project
+    SessionHostName,
+    UserName,
+    ErrorCategory,
+    Code,
+    ErrorDescription,
+    ErrorCount,
+    RecommendedAction,
+    SampleMessage
+| order by ErrorCount desc
