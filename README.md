@@ -1032,3 +1032,9 @@ by
 
 | order by Priority asc, ErrorCount desc, LastSeen desc
 
+
+
+
+WVDConnections
+| project *
+| take 5
