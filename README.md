@@ -690,3 +690,156 @@ by
 | order by
     ErrorCount desc,
     LastSeen desc
+
+
+
+
+
+
+
+
+WVDConnections
+| project
+    TimeGenerated,
+    UserName,
+    SessionHostName,
+    CorrelationId
+
+| join kind=inner (
+    WVDErrors
+    | project
+        CorrelationId,
+        Code=tostring(Code),
+        Message,
+        ErrorTime=TimeGenerated
+) on CorrelationId
+
+| summarize
+    ErrorCount = count(),
+    LastSeen = max(ErrorTime),
+    SampleMessage = any(Message)
+by
+    SessionHostName,
+    UserName,
+    Code
+
+// Error Category
+| extend ErrorCategory = case(
+    Code in ("3076","2055"), "Client Network",
+    Code == "-2147467259", "Session Host",
+    Code == "516", "AVD Connectivity",
+    Code == "90", "Client Network",
+    Code == "68", "Connection",
+    Code == "27396", "Session",
+    Code == "50331694", "Client Network",
+    "Unknown"
+)
+
+// Severity
+| extend Severity = case(
+    Code in ("-2147467259","516"), "Critical",
+    Code in ("90","27396","50331694"), "Warning",
+    Code == "68", "Information",
+    "Unknown"
+)
+
+// Priority
+| extend Priority = case(
+    Severity == "Critical", "P1",
+    Severity == "Warning", "P2",
+    "P3"
+)
+
+// Root Cause
+| extend RootCause = case(
+    Code in ("3076","2055"), "Client Internet / VPN",
+    Code == "-2147467259", "Session Host Failure",
+    Code == "516", "Azure Virtual Desktop Service",
+    Code == "90", "Client Network",
+    Code == "68", "Connection Closed",
+    Code == "27396", "Unexpected Session Disconnect",
+    Code == "50331694", "Network Interruption",
+    "Needs Investigation"
+)
+
+// Error Description
+| extend ErrorDescription = case(
+    Code == "-2147467259", "Unexpected system error on the session host.",
+    Code == "516", "Unable to connect to Azure Virtual Desktop service.",
+    Code == "90", "Session host lost connection to the client.",
+    Code == "68", "Connection terminated unexpectedly.",
+    Code == "27396", "User session disconnected unexpectedly.",
+    Code == "50331694", "Client network interruption detected.",
+    Code in ("3076","2055"), "Client network issue detected.",
+    SampleMessage
+)
+
+// Recommended Action
+| extend RecommendedAction = case(
+    Code in ("3076","2055"), "Verify Internet, VPN and Wi-Fi connection.",
+    Code == "-2147467259", "Check VM Health, AVD Agent, FSLogix and Event Viewer.",
+    Code == "516", "Verify Azure Service Health, DNS and Firewall.",
+    Code == "90", "Ask user to reconnect and verify network stability.",
+    Code == "68", "Review Windows Event Viewer logs.",
+    Code == "27396", "Validate Session Host health.",
+    Code == "50331694", "Check ISP, VPN and packet loss.",
+    "Investigate manually."
+)
+
+// Retry Action
+| extend RetryAction = case(
+    ErrorCategory == "Client Network", "Reconnect session after verifying Internet.",
+    ErrorCategory == "AVD Connectivity", "Retry after 2 minutes.",
+    ErrorCategory == "Session Host", "Restart AVD Agent if required.",
+    "Manual verification."
+)
+
+// Owner Team
+| extend OwnerTeam = case(
+    ErrorCategory == "Client Network", "L1 Support",
+    ErrorCategory == "Connection", "L2 Support",
+    ErrorCategory == "Session", "L2 EUC",
+    ErrorCategory == "Session Host", "AVD Team",
+    ErrorCategory == "AVD Connectivity", "Cloud Team",
+    "Support Team"
+)
+
+// SOP Hint
+| extend SOPHint = case(
+    ErrorCategory == "Client Network", "Check Internet → VPN → Reconnect",
+    ErrorCategory == "Session Host", "Check VM → AVD Agent → FSLogix",
+    ErrorCategory == "AVD Connectivity", "Check Azure Status → DNS → Firewall",
+    ErrorCategory == "Connection", "Review Event Viewer",
+    "Review Sample Message"
+)
+
+// Health Status
+| extend HealthStatus = case(
+    Severity == "Critical", "Action Required",
+    Severity == "Warning", "Investigate",
+    "Healthy"
+)
+
+| project
+    LastSeen,
+    SessionHostName,
+    UserName,
+    ErrorCategory,
+    Severity,
+    Priority,
+    HealthStatus,
+    RootCause,
+    Code,
+    ErrorDescription,
+    RecommendedAction,
+    RetryAction,
+    OwnerTeam,
+    SOPHint,
+    ErrorCount,
+    SampleMessage
+
+| order by
+    Priority asc,
+    ErrorCount desc,
+    LastSeen desc
+
