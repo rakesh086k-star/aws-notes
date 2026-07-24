@@ -843,3 +843,192 @@ by
     ErrorCount desc,
     LastSeen desc
 
+
+
+
+
+
+
+WVDConnections
+| project
+    TimeGenerated,
+    UserName,
+    SessionHostName,
+    CorrelationId
+
+| join kind=inner (
+    WVDErrors
+    | project
+        CorrelationId,
+        Code=tostring(Code),
+        Message,
+        ErrorTime=TimeGenerated
+) on CorrelationId
+
+| summarize
+    ErrorCount=count(),
+    LastSeen=max(ErrorTime),
+    SampleMessage=any(Message)
+by
+    SessionHostName,
+    UserName,
+    Code
+
+// =========================
+// Error Category
+// =========================
+| extend ErrorCategory = case(
+    Code in ("3076","2055"), "🌐 Client Network",
+    Code == "-2147467259", "🖥️ Session Host",
+    Code == "516", "☁️ AVD Connectivity",
+    Code == "90", "📶 Client Disconnected",
+    Code == "68", "🔌 Connection Closed",
+    Code == "27396", "🖥️ Session Disconnected",
+    Code == "50331694", "🌍 Network Interruption",
+    "❓ Unknown"
+)
+
+// =========================
+// Severity
+// =========================
+| extend Severity = case(
+    Code in ("-2147467259","516"), "🔴 Critical",
+    Code in ("90","27396","50331694"), "🟡 Warning",
+    Code == "68", "🟢 Information",
+    "⚪ Unknown"
+)
+
+// =========================
+// Priority
+// =========================
+| extend Priority = case(
+    Severity == "🔴 Critical","🚨 P1",
+    Severity == "🟡 Warning","⚠️ P2",
+    "ℹ️ P3"
+)
+
+// =========================
+// Root Cause
+// =========================
+| extend RootCause = case(
+    Code in ("3076","2055"), "🌐 Client Internet / VPN",
+    Code == "-2147467259","🖥️ Session Host Failure",
+    Code == "516","☁️ Azure Virtual Desktop Service",
+    Code == "90","📶 Client Network",
+    Code == "68","🔌 Connection Closed",
+    Code == "27396","🖥️ Session Interrupted",
+    Code == "50331694","🌍 Network Interruption",
+    "❓ Needs Investigation"
+)
+
+// =========================
+// Description
+// =========================
+| extend ErrorDescription = case(
+    Code=="-2147467259","Unexpected system error on Session Host.",
+    Code=="516","Unable to connect to Azure Virtual Desktop service.",
+    Code=="90","Session Host lost connection to the client.",
+    Code=="68","Connection terminated unexpectedly.",
+    Code=="27396","User session disconnected unexpectedly.",
+    Code=="50331694","Client network interruption detected.",
+    Code in ("3076","2055"),"Client network issue detected.",
+    SampleMessage
+)
+
+// =========================
+// Recommended Action
+// =========================
+| extend RecommendedAction = case(
+    Code in ("3076","2055"),"🌐 Verify Internet / VPN / Wi-Fi.",
+    Code=="-2147467259","🖥️ Check VM Health, AVD Agent, FSLogix.",
+    Code=="516","☁️ Verify Azure Service Health, DNS & Firewall.",
+    Code=="90","📶 Ask user to reconnect.",
+    Code=="68","📋 Review Windows Event Viewer.",
+    Code=="27396","🖥️ Validate Session Host health.",
+    Code=="50331694","🌍 Check ISP & Packet Loss.",
+    "🔍 Investigate manually."
+)
+
+// =========================
+// Retry Action
+// =========================
+| extend RetryAction = case(
+    ErrorCategory=="🌐 Client Network","🔄 Retry after Internet verification",
+    ErrorCategory=="☁️ AVD Connectivity","🔄 Retry after 2 minutes",
+    ErrorCategory=="🖥️ Session Host","🔄 Restart AVD Agent",
+    "🔄 Manual Retry"
+)
+
+// =========================
+// Owner
+// =========================
+| extend OwnerTeam = case(
+    ErrorCategory=="🌐 Client Network","👨‍💻 L1 Support",
+    ErrorCategory=="📶 Client Disconnected","👨‍💻 L1 Support",
+    ErrorCategory=="🔌 Connection Closed","👨‍💻 L2 Support",
+    ErrorCategory=="🖥️ Session Host","🖥️ AVD Team",
+    ErrorCategory=="🖥️ Session Disconnected","🖥️ EUC Team",
+    ErrorCategory=="☁️ AVD Connectivity","☁️ Cloud Team",
+    "👥 Support Team"
+)
+
+// =========================
+// SOP
+// =========================
+| extend SOP = case(
+    ErrorCategory=="🌐 Client Network","📖 Internet → VPN → Reconnect",
+    ErrorCategory=="🖥️ Session Host","📖 VM → AVD Agent → FSLogix",
+    ErrorCategory=="☁️ AVD Connectivity","📖 Azure Status → DNS → Firewall",
+    ErrorCategory=="🔌 Connection Closed","📖 Review Event Viewer",
+    "📖 Review Logs"
+)
+
+// =========================
+// Health Status
+// =========================
+| extend HealthStatus = case(
+    Severity=="🔴 Critical","🔴 Action Required",
+    Severity=="🟡 Warning","🟡 Investigate",
+    "🟢 Healthy"
+)
+
+// =========================
+// Engineer Decision
+// =========================
+| extend EngineerDecision = case(
+    Severity=="🔴 Critical","🚨 Escalate to L2 Immediately",
+    Severity=="🟡 Warning","🔍 Investigate",
+    "✅ Monitor"
+)
+
+// =========================
+// Impact
+// =========================
+| extend Impact = case(
+    ErrorCount >= 20,"🔥 High",
+    ErrorCount >=10,"⚠️ Medium",
+    "✅ Low"
+)
+
+| project
+    LastSeen,
+    SessionHostName,
+    UserName,
+    ErrorCategory,
+    Severity,
+    Priority,
+    HealthStatus,
+    RootCause,
+    Code,
+    ErrorDescription,
+    RecommendedAction,
+    RetryAction,
+    OwnerTeam,
+    SOP,
+    EngineerDecision,
+    Impact,
+    ErrorCount,
+    SampleMessage
+
+| order by Priority asc, ErrorCount desc, LastSeen desc
+
