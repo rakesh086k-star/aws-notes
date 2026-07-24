@@ -567,3 +567,126 @@ WVDConnections
     RecommendedAction,
     SampleMessage
 | order by ErrorCount desc
+
+
+
+
+
+
+
+
+
+
+
+WVDConnections
+| project
+    TimeGenerated,
+    UserName,
+    SessionHostName,
+    CorrelationId
+| join kind=inner (
+    WVDErrors
+    | project
+        CorrelationId,
+        Code=tostring(Code),
+        Message,
+        ErrorTime=TimeGenerated
+) on CorrelationId
+
+| summarize
+    ErrorCount=count(),
+    LastSeen=max(ErrorTime),
+    SampleMessage=any(Message)
+by
+    SessionHostName,
+    UserName,
+    Code
+
+// Error Category
+| extend ErrorCategory = case(
+    Code in ("3076","2055"), "🌐 Client Network",
+    Code == "-2147467259", "🖥️ Session Host",
+    Code == "516", "☁️ AVD Connectivity",
+    Code == "90", "🌐 Client Network",
+    Code == "68", "🔌 Connection",
+    Code == "27396", "🖥️ Session",
+    Code == "50331694", "🌐 Client Network",
+    "❓ Unknown"
+)
+
+// Severity
+| extend Severity = case(
+    Code == "-2147467259", "🔴 Critical",
+    Code == "516", "🔴 Critical",
+    Code == "90", "🟡 Warning",
+    Code == "50331694", "🟡 Warning",
+    Code == "27396", "🟡 Warning",
+    Code == "68", "🟢 Information",
+    "⚪ Unknown"
+)
+
+// Root Cause
+| extend RootCause = case(
+    Code in ("3076","2055"), "Client Internet / VPN",
+    Code == "-2147467259", "Session Host",
+    Code == "516", "Azure Virtual Desktop Service",
+    Code == "90", "Client Network",
+    Code == "50331694", "Client Network",
+    Code == "68", "Connection Closed",
+    Code == "27396", "Unexpected Session Disconnect",
+    "Needs Investigation"
+)
+
+// Description
+| extend ErrorDescription = case(
+    Code == "-2147467259", "Unexpected system error on the Session Host.",
+    Code == "516", "Unable to connect to Azure Virtual Desktop service.",
+    Code == "90", "Session Host lost connection to the client.",
+    Code == "68", "Connection terminated unexpectedly.",
+    Code == "27396", "User session disconnected unexpectedly.",
+    Code == "50331694", "Client network interruption detected.",
+    Code in ("3076","2055"), "Client network issue detected.",
+    SampleMessage
+)
+
+// Recommended Action
+| extend RecommendedAction = case(
+    Code in ("3076","2055"), "Verify user internet, VPN and Wi-Fi connection.",
+    Code == "-2147467259", "Check VM health, AVD Agent, FSLogix and Event Viewer.",
+    Code == "516", "Verify Azure connectivity, DNS, Firewall and AVD Service Health.",
+    Code == "90", "Check client internet stability and reconnect.",
+    Code == "68", "Review Windows Event Viewer and connection logs.",
+    Code == "27396", "Review Session Host logs and user sign-in activity.",
+    Code == "50331694", "Check ISP, VPN and packet loss.",
+    "Review Sample Message and investigate."
+)
+
+// Owner
+| extend Owner = case(
+    Code in ("3076","2055"), "L1 Support",
+    Code == "90", "L1 Support",
+    Code == "50331694", "L1 Support",
+    Code == "68", "L2 EUC",
+    Code == "27396", "L2 EUC",
+    Code == "-2147467259", "L2 AVD",
+    Code == "516", "Cloud Team",
+    "Support Team"
+)
+
+| project
+    LastSeen,
+    SessionHostName,
+    UserName,
+    ErrorCategory,
+    Severity,
+    RootCause,
+    Code,
+    ErrorDescription,
+    RecommendedAction,
+    Owner,
+    ErrorCount,
+    SampleMessage
+
+| order by
+    ErrorCount desc,
+    LastSeen desc
