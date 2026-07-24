@@ -499,3 +499,9 @@ UserData
 
 Add-AppProvisionedAppxPackage -Online -PackagePath "C:\Temp\Application.msix" -SkipLicense
 
+
+DISM /Online /Add-ProvisionedAppxPackage /PackagePath:"C:\Temp\Application.msix" /SkipLicense
+
+
+
+
