@@ -3,31 +3,37 @@ WVDConnections
 | summarize LastLogin = max(TimeGenerated) by UserName;
 
 LastLogin
-| extend DaysSinceLastLogin = datetime_diff('day', now(), LastLogin) * -1
+| extend DaysSinceLastLogin = datetime_diff("day", now(), LastLogin) * -1
+
 | extend LoginStatus = case(
-    DaysSinceLastLogin == 0, "Today",
-    DaysSinceLastLogin == 1, "Yesterday",
-    DaysSinceLastLogin <= 7, "Last 7 Days",
-    DaysSinceLastLogin <= 30, "Last 30 Days",
-    "Inactive"
+    DaysSinceLastLogin == 0, "🟢 Today",
+    DaysSinceLastLogin == 1, "🟡 Yesterday",
+    DaysSinceLastLogin == 2, "🟠 2 Days Ago",
+    DaysSinceLastLogin == 3, "🟠 3 Days Ago",
+    DaysSinceLastLogin == 4, "🟠 4 Days Ago",
+    DaysSinceLastLogin == 5, "🟠 5 Days Ago",
+    DaysSinceLastLogin == 6, "🟠 6 Days Ago",
+    DaysSinceLastLogin == 7, "🟠 7 Days Ago",
+    DaysSinceLastLogin <= 14, strcat("🔶 ", tostring(DaysSinceLastLogin), " Days Ago"),
+    DaysSinceLastLogin <= 30, strcat("🔴 ", tostring(DaysSinceLastLogin), " Days Ago"),
+    strcat("⚫ ", tostring(DaysSinceLastLogin), " Days Ago")
 )
-| extend Attention = case(
-    DaysSinceLastLogin == 0, "Active",
-    DaysSinceLastLogin <= 7, "Normal",
-    DaysSinceLastLogin <= 30, "Warning",
-    "Critical"
-)
+
 | extend UserActivity = case(
-    DaysSinceLastLogin == 0, "Frequently Using AVD",
-    DaysSinceLastLogin <= 7, "Regular User",
-    DaysSinceLastLogin <= 30, "Occasional User",
-    "Inactive User"
+    DaysSinceLastLogin == 0, "✅ Active Today",
+    DaysSinceLastLogin == 1, "👍 Daily User",
+    DaysSinceLastLogin <= 3, "🙂 Frequently Using AVD",
+    DaysSinceLastLogin <= 7, "📅 Regular User",
+    DaysSinceLastLogin <= 14, "⚠️ Less Frequent User",
+    DaysSinceLastLogin <= 30, "⏳ Rarely Using AVD",
+    "❌ Inactive User"
 )
+
 | project
     UserName,
     LastLogin,
     DaysSinceLastLogin,
     LoginStatus,
-    Attention,
     UserActivity
+
 | order by LastLogin desc
