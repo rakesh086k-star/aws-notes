@@ -37,3 +37,20 @@ LastLogin
     UserActivity
 
 | order by LastLogin desc
+
+
+
+
+
+
+
+
+| extend UserActivity = case(
+    DaysSinceLastLogin == 0, "✅ Active Today",
+    DaysSinceLastLogin == 1, "👍 Daily User",
+    DaysSinceLastLogin >= 2 and DaysSinceLastLogin <= 3, "🚀 Frequently Using AVD",
+    DaysSinceLastLogin >= 4 and DaysSinceLastLogin <= 7, "📅 Regular User",
+    DaysSinceLastLogin >= 8 and DaysSinceLastLogin <= 14, "⚠️ Less Frequent User",
+    DaysSinceLastLogin >= 15 and DaysSinceLastLogin <= 30, "⏳ Rarely Using AVD",
+    "❌ Inactive User"
+)
