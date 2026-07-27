@@ -3,7 +3,7 @@ WVDConnections
 | summarize LastLogin = max(TimeGenerated) by UserName;
 
 LastLogin
-| extend DaysSinceLastLogin = datetime_diff("day", now(), LastLogin) * -1
+| extend DaysSinceLastLogin = datetime_diff("day", LastLogin, now())
 
 | extend LoginStatus = case(
     DaysSinceLastLogin == 0, "🟢 Today",
@@ -14,7 +14,7 @@ LastLogin
     DaysSinceLastLogin == 5, "🟠 5 Days Ago",
     DaysSinceLastLogin == 6, "🟠 6 Days Ago",
     DaysSinceLastLogin == 7, "🟠 7 Days Ago",
-    DaysSinceLastLogin <= 14, strcat("🔶 ", tostring(DaysSinceLastLogin), " Days Ago"),
+    DaysSinceLastLogin <= 14, strcat("🟣 ", tostring(DaysSinceLastLogin), " Days Ago"),
     DaysSinceLastLogin <= 30, strcat("🔴 ", tostring(DaysSinceLastLogin), " Days Ago"),
     strcat("⚫ ", tostring(DaysSinceLastLogin), " Days Ago")
 )
@@ -22,10 +22,10 @@ LastLogin
 | extend UserActivity = case(
     DaysSinceLastLogin == 0, "✅ Active Today",
     DaysSinceLastLogin == 1, "👍 Daily User",
-    DaysSinceLastLogin <= 3, "🙂 Frequently Using AVD",
-    DaysSinceLastLogin <= 7, "📅 Regular User",
-    DaysSinceLastLogin <= 14, "⚠️ Less Frequent User",
-    DaysSinceLastLogin <= 30, "⏳ Rarely Using AVD",
+    DaysSinceLastLogin >= 2 and DaysSinceLastLogin <= 3, "🚀 Frequently Using AVD",
+    DaysSinceLastLogin >= 4 and DaysSinceLastLogin <= 7, "📅 Regular User",
+    DaysSinceLastLogin >= 8 and DaysSinceLastLogin <= 14, "⚠️ Less Frequent User",
+    DaysSinceLastLogin >= 15 and DaysSinceLastLogin <= 30, "⏳ Rarely Using AVD",
     "❌ Inactive User"
 )
 
@@ -37,20 +37,3 @@ LastLogin
     UserActivity
 
 | order by LastLogin desc
-
-
-
-
-
-
-
-
-| extend UserActivity = case(
-    DaysSinceLastLogin == 0, "✅ Active Today",
-    DaysSinceLastLogin == 1, "👍 Daily User",
-    DaysSinceLastLogin >= 2 and DaysSinceLastLogin <= 3, "🚀 Frequently Using AVD",
-    DaysSinceLastLogin >= 4 and DaysSinceLastLogin <= 7, "📅 Regular User",
-    DaysSinceLastLogin >= 8 and DaysSinceLastLogin <= 14, "⚠️ Less Frequent User",
-    DaysSinceLastLogin >= 15 and DaysSinceLastLogin <= 30, "⏳ Rarely Using AVD",
-    "❌ Inactive User"
-)
