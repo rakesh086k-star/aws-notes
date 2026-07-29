@@ -1,28 +1,25 @@
-let LastLogin =
-WVDConnections
-| summarize LastLogin = max(TimeGenerated) by UserName;
+# Get all VMs
+$vms = Get-AzVM
 
-LastLogin
-| extend DaysSinceLastLogin = datetime_diff("day", LastLogin, now())
+$result = foreach ($vm in $vms) {
 
-| extend LoginStatus = case(
-    DaysSinceLastLogin == 0, "🟢 Today",
-    DaysSinceLastLogin == 1, "🟡 Yesterday",
-    DaysSinceLastLogin == 2, "🟠 2 Days Ago",
-    DaysSinceLastLogin == 3, "🟠 3 Days Ago",
-    DaysSinceLastLogin == 4, "🟠 4 Days Ago",
-    DaysSinceLastLogin == 5, "🟠 5 Days Ago",
-    DaysSinceLastLogin == 6, "🟠 6 Days Ago",
-    DaysSinceLastLogin == 7, "🟠 7 Days Ago",
-    DaysSinceLastLogin <= 14, strcat("🟣 ", tostring(DaysSinceLastLogin), " Days Ago"),
-    DaysSinceLastLogin <= 30, strcat("🔴 ", tostring(DaysSinceLastLogin), " Days Ago"),
-    strcat("⚫ ", tostring(DaysSinceLastLogin), " Days Ago")
-)
+    $extensions = Get-AzVMExtension `
+        -ResourceGroupName $vm.ResourceGroupName `
+        -VMName $vm.Name `
+        -ErrorAction SilentlyContinue
 
-| project
-    UserName,
-    LastLogin,
-    DaysSinceLastLogin,
-    LoginStatus
+    $ama = $extensions | Where-Object {
+        $_.ExtensionType -eq "AzureMonitorWindowsAgent" -or
+        $_.ExtensionType -eq "AzureMonitorLinuxAgent"
+    }
 
-| order by LastLogin desc
+    [PSCustomObject]@{
+        VMName           = $vm.Name
+        ResourceGroup    = $vm.ResourceGroupName
+        Location         = $vm.Location
+        OperatingSystem  = $vm.StorageProfile.OSDisk.OsType
+        AMAInstalled     = if ($ama) { "YES" } else { "NO" }
+    }
+}
+
+$result | Sort-Object AMAInstalled, VMName | Format-Table -AutoSize
