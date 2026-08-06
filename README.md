@@ -1,3 +1,6 @@
-Application
-| where ResourceProvider contains "Recovery"
+ASRReplicationItems
+| take 10
+
+
+ASRReplicationItems
 | order by TimeGenerated desc
