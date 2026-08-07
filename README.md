@@ -1,19 +1,40 @@
-ASRReplicationItems
-| take 10
+ASRReplicatedItems
+| where TimeGenerated > ago(7d)
+| summarize arg_max(TimeGenerated, *) by ReplicatedItemUniqueId
+| project
+    TimeGenerated,
+    VMName = ReplicatedItemFriendlyName,
+    ReplicationStatus,
+    ReplicationHealth = ReplicationHealthErrors,
+    RecoveryRegion,
+    PrimaryFabricName,
+    RecoveryFabricName,
+    PrimaryActiveLocation,
+    OSFamily,
+    LastHeartbeat,
+    LastReplicatedItem,
+    MultiVMGroupId,
+    FailoverReadiness,
+    DataSourceFriendlyName
+| order by VMName asc
 
 
-ASRReplicationItems
-| order by TimeGenerated desc
-
-
-search *
-| summarize Count=count() by $table
-| order by Count desc
-
-
-search *
-| where $table contains "Recovery"
-   or $table contains "SiteRecovery"
-   or $table contains "AzureActivity"
-| summarize Count=count() by $table
-| order by Count desc
+ASRReplicatedItems
+| where TimeGenerated > ago(7d)
+| summarize arg_max(TimeGenerated, *) by ReplicatedItemFriendlyName
+| project
+    TimeGenerated,
+    VMName = ReplicatedItemFriendlyName,
+    ReplicationStatus,
+    ReplicationHealth = ReplicationHealthErrors,
+    RecoveryRegion,
+    PrimaryFabricName,
+    RecoveryFabricName,
+    PrimaryActiveLocation,
+    OSFamily,
+    LastHeartbeat,
+    LastReplicatedItem,
+    MultiVMGroupId,
+    FailoverReadiness,
+    DataSourceFriendlyName
+| order by VMName asc
