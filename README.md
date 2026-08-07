@@ -130,6 +130,45 @@ ASRReplicatedItems
         HealthStatus == "Warning", 2,
         HealthStatus == "Healthy", 3,
         4
+    ) 
+
+
+
+ASRReplicatedItems
+| summarize arg_max(TimeGenerated, *) by ReplicatedItemUniqueId
+| extend
+    TestFailoverDone = isnotempty(LastSuccessfulTestFailoverTime),
+    FailoverPerformed = ActiveLocation == RecoveryRegion
+| extend
+    HealthStatus = case(
+        ProtectionInfo !~ "Protected" or isnotempty(ReplicationHealthErrors), "Critical",
+        not(TestFailoverDone) and FailoverPerformed, "Warning",
+        ReplicationStatus =~ "Protected" and ProtectionInfo =~ "Protected", "Healthy",
+        "Warning"
+    )
+| extend
+    Description = case(
+        HealthStatus == "Critical", "Protection Error",
+        HealthStatus == "Warning" and not(TestFailoverDone) and FailoverPerformed,
+            "Test Failover Not Performed, but Failover Performed",
+        HealthStatus == "Healthy", "Healthy",
+        "Test Failover Not Performed"
+    )
+| extend
+    StatusIcon = case(
+        HealthStatus == "Critical", "🔴",
+        HealthStatus == "Warning", "🟠",
+        HealthStatus == "Healthy", "🟢",
+        "⚪"
+    )
+| summarize Machines = count() by HealthStatus, Description, StatusIcon
+| order by
+    case(
+        HealthStatus == "Critical", 1,
+        HealthStatus == "Warning", 2,
+        HealthStatus == "Healthy", 3,
+        4
     ) asc
+
 
 
