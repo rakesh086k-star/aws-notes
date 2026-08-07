@@ -1,10 +1,5 @@
 ASRReplicatedItems
-| summarize Machines = dcount(ReplicatedItemUniqueId)
-    by PrimaryFabricName, RecoveryRegion
-| order by Machines desc
-
-
-ASRReplicatedItems
+| summarize arg_max(TimeGenerated, *) by ReplicatedItemUniqueId
 | project
     VMName = ReplicatedItemFriendlyName,
     PrimaryRegion = PrimaryFabricName,
