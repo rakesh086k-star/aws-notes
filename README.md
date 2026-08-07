@@ -1,4 +1,5 @@
 ASRReplicatedItems
-| summarize arg_max(TimeGenerated, *) by ReplicatedItemFriendlyName
-| summarize Count = count() by ProtectionInfo
-| order by Count desc
+| summarize
+    TotalRecords = count(),
+    UniqueVMs = dcount(ReplicatedItemFriendlyName),
+    UniqueIDs = dcount(ReplicatedItemUniqueId)
