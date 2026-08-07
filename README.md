@@ -1,9 +1,4 @@
-let TotalMachines = 70;
-let ProtectedMachines =
-    toscalar(
-        ASRReplicatedItems
-        | summarize dcount(ReplicatedItemUniqueId)
-    );
-union
-    (print Status="Protected", Count=ProtectedMachines),
-    (print Status="Not Protected", Count=TotalMachines-ProtectedMachines)
+ASRReplicatedItems
+| summarize Machines = dcount(ReplicatedItemUniqueId)
+    by PrimaryFabricName, RecoveryRegion
+| order by Machines desc
