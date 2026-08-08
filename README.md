@@ -1,1 +1,2 @@
-Get-ChildItem "C:\ProgramData\FSLogix\Logs\Profile" | Sort-Object LastWriteTime -Descending | Select-Object -First 5 Name,Length,LastWriteTime
+Select-String -Path "C:\ProgramData\FSLogix\Logs\Profile\Profile_*.log" `
+-Pattern "LoadProfile","SizeInMBs","MB left","% free","SessionId"
