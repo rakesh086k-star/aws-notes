@@ -1,5 +1,1 @@
-LAWCustomFslogix_CL
-| where TimeGenerated > ago(24h)
-| extend RawText = tostring(RawData)
-| project TimeGenerated, Computer, FilePath, RawText
-| take 10
+Get-Content "C:\ProgramData\FSLogix\Logs\Profile\Profile-20260808.log" -Tail 10
