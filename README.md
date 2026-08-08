@@ -1,8 +1,4 @@
-File pattern:
-C:\ProgramData\FSLogix\Logs\Profile\Profile-*.log
-
-Table:
 FSLogixProfile_CL
-
-Record delimiter:
-End of line
+| where TimeGenerated > ago(30m)
+| project TimeGenerated, Computer, FilePath, RawData
+| order by TimeGenerated desc
