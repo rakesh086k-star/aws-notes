@@ -1,1 +1,1 @@
-Select-String -Path "C:\ProgramData\FSLogix\Logs\Profile\Profile-20260808.log" -Pattern "LoadProfile|SizeInMBs|MB left|% free|SessionId"
+C:\ProgramData\FSLogix\Logs\Profile\Profile-*.log
