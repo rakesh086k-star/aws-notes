@@ -14,4 +14,4 @@ Event
     EventID,
     EventLevelName,
     RenderedDescription
-| order by TimeGenerated desc
+| order by TimeGenerated desc 
