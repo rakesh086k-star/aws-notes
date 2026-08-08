@@ -1,5 +1,7 @@
 LAWCustomfslogix_CL
-| where TimeGenerated > ago(1h)
-| project TimeGenerated, Computer, FilePath, RawData
-| order by TimeGenerated desc
-| take 20
+| where TimeGenerated > ago(24h)
+| summarize
+    Total=count(),
+    ComputerCount=dcount(Computer),
+    FilePathCount=dcount(FilePath),
+    RawDataCount=dcount(RawData)
