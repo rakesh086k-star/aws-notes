@@ -1,4 +1,5 @@
-FSLogixProfile_CL
+AALCUSTOMFslogix_CL
 | where TimeGenerated > ago(24h)
-| project TimeGenerated, Computer, RawData
+| extend RawText = tostring(RawData)
+| project TimeGenerated, Computer, FilePath, RawText
 | order by TimeGenerated desc
