@@ -1,3 +1,5 @@
 LAWCUSTOMFslogix_CL
-| take 10
-| project TimeGenerated, Computer, FilePath, RawData
+| summarize
+    TotalRecords = count(),
+    RawDataPresent = countif(isnotempty(tostring(RawData))),
+    RawDataEmpty = countif(isempty(tostring(RawData)))
