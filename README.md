@@ -1,12 +1,6 @@
-resources
-| where type =~ 'microsoft.storage/storageaccounts'
-| where properties.azureFilesIdentityBasedAuthentication.directoryServiceOptions == 'AD'
-| project
-    subscriptionId,
-    resourceGroup,
-    storageAccount=name,
-    domainName=properties.azureFilesIdentityBasedAuthentication.activeDirectoryProperties.domainName,
-    forestName=properties.azureFilesIdentityBasedAuthentication.activeDirectoryProperties.forestName,
-    samAccountName=properties.azureFilesIdentityBasedAuthentication.activeDirectoryProperties.samAccountName,
-    accountType=properties.azureFilesIdentityBasedAuthentication.activeDirectoryProperties.accountType
-| order by domainName, storageAccount
+AALW_Custom_FSLogix_CL
+| summarize
+    TotalRecords = count(),
+    Critical = countif(Severity_s =~ "Critical"),
+    Warning = countif(Severity_s =~ "Warning"),
+    Errors = countif(Severity_s =~ "Error")
