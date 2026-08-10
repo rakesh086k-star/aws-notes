@@ -1,1 +1,1 @@
-Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+klist get cifs/stfslogixpph01.file.core.windows.net
