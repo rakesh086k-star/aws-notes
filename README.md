@@ -1,1 +1,1 @@
-klist get cifs/stfslogixpph01.file.core.windows.net
+KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
