@@ -1,15 +1,8 @@
-Resources
-| where type =~ "microsoft.compute/virtualmachines"
-| extend
-    VMName = name,
-    VMSize = tostring(properties.hardwareProfile.vmSize),
-    ComputerName = tostring(properties.osProfile.computerName),
-    Location = location
+VMComputer
+| summarize arg_max(TimeGenerated, *) by Computer
 | project
-    VMName,
-    ComputerName,
-    VMSize,
-    Location,
-    ResourceGroup = resourceGroup,
-    Subscription = subscriptionId
-| order by VMSize asc, VMName asc
+    Computer,
+    Cpus = LogicalProcessorCount,
+    MemoryGB = round(PhysicalMemoryMB / 1024.0, 1),
+    AzureResourceId
+| order by Computer asc
