@@ -1,1 +1,6 @@
-KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
+Get-Module -ListAvailable ActiveDirectory
+
+
+Get-ADObject -LDAPFilter "(&(servicePrincipalName=*.file.core.windows.net)(!(msDS-SupportedEncryptionTypes=*)))" -Properties servicePrincipalName,msDS-SupportedEncryptionTypes | Select-Object Name,ObjectClass,servicePrincipalName,msDS-SupportedEncryptionTypes
+
+
