@@ -1,9 +1,15 @@
-LAWCUSTOMfslogix_CL
-| where TimeGenerated > ago(24h)
+Resources
+| where type =~ "microsoft.compute/virtualmachines"
+| extend
+    VMName = name,
+    VMSize = tostring(properties.hardwareProfile.vmSize),
+    ComputerName = tostring(properties.osProfile.computerName),
+    Location = location
 | project
-    TimeGenerated,
-    Computer,
-    FilePath,
-    RawData,
-    RawDataType = gettype(RawData)
-| take 10
+    VMName,
+    ComputerName,
+    VMSize,
+    Location,
+    ResourceGroup = resourceGroup,
+    Subscription = subscriptionId
+| order by VMSize asc, VMName asc
