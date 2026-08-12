@@ -1,4 +1,5 @@
 Perf
-| where TimeGenerated >= ago(7d)
-| summarize Count=count() by ObjectName, CounterName
-| order by Count desc
+| where TimeGenerated >= ago(1d)
+| where ObjectName contains "Processor"
+| project TimeGenerated, Computer, ObjectName, CounterName, InstanceName, CounterValue
+| take 50
