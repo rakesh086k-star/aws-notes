@@ -1,10 +1,10 @@
 let SelectedUsers = dynamic([
-    "user1@company.com",
-    "user2@company.com",
-    "user3@company.com",
-    "user4@company.com",
-    "user5@company.com",
-    "user6@company.com"
+    "Udit146824@exlservice.com",
+    "Simrita160093@exlservice.com",
+    "Akanksha170280@exlservice.com",
+    "Kritika205648@exlservice.com",
+    "Akanksh161389@exlservice.com",
+    "Yashwant160794@exlservice.com"
 ]);
 
 WVDConnections
@@ -13,12 +13,5 @@ WVDConnections
 | project
     TimeGenerated,
     UserName,
-    State,
-    Source,
-    ClientType,
-    ClientVersion,
-    ConnectionType,
-    CorrelationId,
-    *
-| take 100
+    State
 | order by TimeGenerated desc
