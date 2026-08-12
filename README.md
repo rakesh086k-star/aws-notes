@@ -1,1 +1,3 @@
-=IF(A2<1024,ROUND(A2,2)&" KBps",ROUND(A2/1024,2)&" MBps")
+AALW_Custom_FSLogix_CLR_CL
+| where TimeGenerated > ago(24h)
+| take 20
