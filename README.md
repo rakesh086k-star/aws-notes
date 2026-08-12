@@ -7,39 +7,19 @@ let SelectedUsers = dynamic([
     "Yashwant160794@exlservice.com"
 ]);
 
-WVDConnections
+WVDErrors
 | where TimeGenerated >= ago(7d)
 | where UserName in~ (SelectedUsers)
+| where ActivityType == "Connection"
 | project
-    ConnectionTime = TimeGenerated,
+    TimeGenerated,
     UserName,
-    SessionHostName,
-    CorrelationId
-| join kind=inner (
-    WVDErrors
-    | where TimeGenerated >= ago(7d)
-    | project
-        ErrorTime = TimeGenerated,
-        CorrelationId,
-        Category,
-        Severity,
-        Priority,
-        HealthStatus,
-        RootCause,
-        Code,
-        ErrorDescription,
-        RecommendedAction
-) on CorrelationId
-| project
-    ConnectionTime,
-    ErrorTime,
-    UserName,
-    Category,
-    Severity,
-    Priority,
-    HealthStatus,
-    RootCause,
+    ActivityType,
+    Source,
+    ServiceError,
     Code,
-    ErrorDescription,
-    RecommendedAction
-| order by ErrorTime desc
+    CodeSymbolic,
+    Message,
+    Operation,
+    CorrelationId
+| order by TimeGenerated desc
