@@ -1,11 +1,16 @@
 Perf
-| where TimeGenerated >= ago(1h)
-| where ObjectName contains "Processor"
+| where TimeGenerated >= ago(7d)
+| where ObjectName == "Processor"
+| where CounterName == "% Processor Time"
+| where InstanceName == "_Total"
+| extend TimeSlot = bin(TimeGenerated, 30m)
+| summarize
+    CPU_Avg = round(avg(todouble(CounterValue)), 2),
+    CPU_Max = round(max(todouble(CounterValue)), 2)
+    by Computer, TimeSlot
 | project
-    TimeGenerated,
+    TimeSlot,
     Computer,
-    ObjectName,
-    CounterName,
-    InstanceName,
-    CounterValue
-| take 100
+    CPU_Avg,
+    CPU_Max
+| order by TimeSlot asc
