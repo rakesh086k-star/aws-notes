@@ -7,6 +7,18 @@ let SelectedUsers = dynamic([
     "user6@company.com"
 ]);
 
-let UserSessions =
 WVDConnections
-| where TimeGenerated >=
+| where TimeGenerated >= ago(7d)
+| where UserName in~ (SelectedUsers)
+| project
+    TimeGenerated,
+    UserName,
+    State,
+    Source,
+    ClientType,
+    ClientVersion,
+    ConnectionType,
+    CorrelationId,
+    *
+| take 100
+| order by TimeGenerated desc
