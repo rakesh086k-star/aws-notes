@@ -11,7 +11,35 @@ WVDConnections
 | where TimeGenerated >= ago(7d)
 | where UserName in~ (SelectedUsers)
 | project
-    TimeGenerated,
+    ConnectionTime = TimeGenerated,
     UserName,
-    State
-| order by TimeGenerated desc
+    SessionHostName,
+    CorrelationId
+| join kind=inner (
+    WVDErrors
+    | where TimeGenerated >= ago(7d)
+    | project
+        ErrorTime = TimeGenerated,
+        CorrelationId,
+        Category,
+        Severity,
+        Priority,
+        HealthStatus,
+        RootCause,
+        Code,
+        ErrorDescription,
+        RecommendedAction
+) on CorrelationId
+| project
+    ConnectionTime,
+    ErrorTime,
+    UserName,
+    Category,
+    Severity,
+    Priority,
+    HealthStatus,
+    RootCause,
+    Code,
+    ErrorDescription,
+    RecommendedAction
+| order by ErrorTime desc
