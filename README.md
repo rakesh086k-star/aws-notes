@@ -115,3 +115,13 @@ Event
 
 
 
+AALW_Custom_FSLogix_CLR
+| where TimeGenerated > ago(48h)
+| project TimeGenerated, ComputerName, FilePath, RowData
+| where RowData has_any ("size", "Size", "profile", "Profile", "VHDX", "VHD")
+| order by TimeGenerated desc
+| take 100
+
+
+
+
