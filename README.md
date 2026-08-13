@@ -94,4 +94,24 @@ Event
 
 
 
+Event
+| where TimeGenerated > ago(48h)
+| where EventLog has "FSLogix"
+    or Source has "FSLogix"
+    or RenderedDescription has "FSLogix"
+| extend Description = tostring(RenderedDescription)
+| project
+    TimeGenerated,
+    Computer,
+    UserName,
+    EventID,
+    EventLevelName,
+    EventLog,
+    Source,
+    Description
+| order by TimeGenerated desc
+| take 500
+
+
+
 
