@@ -21,3 +21,60 @@ Event
     RenderedDescription
 | order by TimeGenerated desc
 | take 100
+
+
+
+Event
+| where TimeGenerated > ago(48h)
+| where EventLog has "FSLogix"
+    or Source has "FSLogix"
+    or RenderedDescription has "FSLogix"
+| where EventID == 35
+| summarize arg_max(TimeGenerated, *) by Computer
+| project
+    TimeGenerated,
+    Computer,
+    EventID,
+    EventLevelName,
+    RenderedDescription
+| order by Computer asc
+
+
+
+Event
+| where TimeGenerated > ago(48h)
+| where EventLog has "FSLogix"
+    or Source has "FSLogix"
+    or RenderedDescription has "FSLogix"
+| where EventLevelName in ("Error", "Warning")
+| project
+    TimeGenerated,
+    Computer,
+    EventID,
+    EventLevelName,
+    EventLog,
+    Source,
+    RenderedDescription,
+    UserName
+| order by TimeGenerated desc
+
+
+
+
+Event
+| where TimeGenerated > ago(48h)
+| where EventLog has "FSLogix"
+    or Source has "FSLogix"
+    or RenderedDescription has "FSLogix"
+| where RenderedDescription has_any ("profile", "size", "MB", "GB", "VHD", "VHDX")
+| project
+    TimeGenerated,
+    Computer,
+    UserName,
+    EventID,
+    EventLevelName,
+    RenderedDescription
+| order by TimeGenerated desc
+
+
+
