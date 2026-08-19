@@ -1,20 +1,16 @@
-let TimeWindow = 2h;
-
 let TotalMachines =
-    WVDConnections
+    WVDAgentHealthStatus
     | summarize TotalMachines = dcount(SessionHostName);
 
-let RunningMachines =
+let ActiveLast2Hours =
     WVDConnections
-    | where TimeGenerated >= ago(TimeWindow)
-    | summarize RunningMachines = dcount(SessionHostName);
+    | where TimeGenerated >= ago(2h)
+    | summarize ActiveMachines = dcount(SessionHostName);
 
 TotalMachines
-| join kind=fullouter RunningMachines on $left.TotalMachines == $right.RunningMachines
-| extend TotalMachines = coalesce(TotalMachines, 0),
-         RunningMachines = coalesce(RunningMachines, 0)
-| extend NonRunningMachines = TotalMachines - RunningMachines
+| extend ActiveMachines = toscalar(ActiveLast2Hours)
+| extend NonRunningMachines = TotalMachines - ActiveMachines
 | project
     TotalMachines,
-    RunningMachines,
+    ActiveMachines,
     NonRunningMachines
