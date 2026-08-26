@@ -1,3 +1,5 @@
-Resources
-| where type =~ "microsoft.desktopvirtualization/hostpools"
-| project name, resourceGroup, subscriptionId, location, id
+az extension add --name desktopvirtualization
+
+
+
+az desktopvirtualization hostpool list --query "[].{Name:name,ResourceGroup:resourceGroup,Location:location,ResourceId:id}" -o table
