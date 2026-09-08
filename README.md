@@ -1,17 +1,16 @@
-WVDSessions
+WVDConnections
 | where TimeGenerated > ago(4h)
-| summarize arg_max(TimeGenerated, *) by SessionId, UserName
+| where isnotempty(UserName)
+| summarize arg_max(TimeGenerated, *) by CorrelationId
 | extend Status = case(
-    SessionState =~ "Active", "Active",
-    SessionState =~ "Connected", "Active",
-    SessionState =~ "Disconnected", "Disconnected",
-    SessionState =~ "LogOff", "Logged Off",
-    SessionState =~ "Pending", "Pending",
-    tostring(SessionState)
+    State == "Connected", "Active",
+    State == "Started", "Active",
+    State == "Completed", "Disconnected",
+    State
 )
 | project
     Status,
     ComputerName = tostring(SessionHostName),
     UserName = tostring(UserName),
     TimeGenerated
-| order by Status asc, ComputerName asc, UserName as
+| order by Status asc, ComputerName asc, UserName asc
