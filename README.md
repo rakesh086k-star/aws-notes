@@ -1,35 +1,57 @@
-// ==========================================
-// AVD User Session Status - Active / Disconnected / Idle
-// Shows: Metric, Computer Name, User Name
-// ==========================================
+// ============================================
+// AVD User Session Details
+// Active / Disconnected / Idle
+// ============================================
 
-print Metric = "Active Users"
-| extend ComputerName = "", UserName = ""
-| union (
+let ActiveUsers =
     WVDConnections
     | where TimeGenerated > ago(4h)
+    | where State == "Connected"
     | where isnotempty(UserName)
+    | summarize arg_max(TimeGenerated, *) by CorrelationId
     | extend Metric = "Active Users"
-    | extend ComputerName = tostring(SessionHostName)
-    | extend UserName = tostring(UserName)
-    | project Metric, ComputerName, UserName
-)
-| union (
+    | project
+        Metric,
+        ComputerName = tostring(SessionHostName),
+        UserName = tostring(UserName),
+        TimeGenerated;
+
+let DisconnectedUsers =
     WVDCheckpoints
-    | where TimeGenerated > ago(1h)
+    | where TimeGenerated > ago(4h)
     | where Name contains "Disconnected"
     | where isnotempty(UserName)
+    | project
+        TimeGenerated,
+        CorrelationId,
+        UserName,
+        Name
+    | join kind=leftouter
+    (
+        WVDConnections
+        | project
+            CorrelationId,
+            SessionHostName
+    )
+    on CorrelationId
     | extend Metric = "Disconnected Sessions"
-    | extend ComputerName = tostring(SessionHostName)
-    | extend UserName = tostring(UserName)
-    | project Metric, ComputerName, UserName
-)
-| union (
+    | project
+        Metric,
+        ComputerName = tostring(SessionHostName),
+        UserName = tostring(UserName),
+        TimeGenerated;
+
+let IdleHosts =
     WVDAgentHealthStatus
     | where TimeGenerated > ago(1h)
+    | where toint(InactiveSessions) > 0
+    | summarize arg_max(TimeGenerated, *) by _ResourceId
     | extend Metric = "Idle Sessions"
-    | extend ComputerName = tostring(SessionHostName)
-    | extend UserName = "N/A"
-    | project Metric, ComputerName, UserName
-)
+    | project
+        Metric,
+        ComputerName = tostring(extract(@"[^/]+$", 0, _ResourceId)),
+        UserName = "N/A",
+        TimeGenerated;
+
+union ActiveUsers, DisconnectedUsers, IdleHosts
 | order by Metric asc, ComputerName asc, UserName asc
