@@ -14,4 +14,4 @@ WVDSessions
     ComputerName = tostring(SessionHostName),
     UserName = tostring(UserName),
     TimeGenerated
-| order by Status asc, ComputerName asc, UserName asc
+| order by Status asc, ComputerName asc, UserName as
