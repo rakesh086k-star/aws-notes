@@ -7,3 +7,7 @@ Get-ChildItem "C:\Users\Shubham235269_OLD" -Force | Select-Object Name, Mode
 
 
 Remove-Item "C:\Users\Shubham235269_OLD" -Recurse -Force
+
+
+
+Stop-Process -Name Dropbox -Force -ErrorAction SilentlyContinue
