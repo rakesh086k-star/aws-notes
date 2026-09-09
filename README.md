@@ -26,4 +26,4 @@ Resources
     Status == "Deallocated", 3,
     Status == "Unavailable", 4,
     5
-) asc
+) as
