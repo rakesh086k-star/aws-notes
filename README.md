@@ -16,7 +16,9 @@ LastLogin
     DaysSinceLastLogin == 5, "5 Days Ago",
     DaysSinceLastLogin == 6, "6 Days Ago",
     DaysSinceLastLogin == 7, "7 Days Ago",
-    strcat(DaysSinceLastLogin, " Days Ago")
+    DaysSinceLastLogin <= 14, strcat(tostring(DaysSinceLastLogin), " Days Ago"),
+    DaysSinceLastLogin <= 30, strcat(tostring(DaysSinceLastLogin), " Days Ago"),
+    strcat(tostring(DaysSinceLastLogin), " Days Ago")
 )
 | project
     UserName,
