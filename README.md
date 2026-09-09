@@ -1,29 +1,18 @@
-let LastLogin =
-WVDConnections
-| summarize arg_max(TimeGenerated, *) by UserName
-| extend
-    ComputerName = tostring(SessionHostName),
-    LastLogin = TimeGenerated;
-
-LastLogin
-| extend DaysSinceLastLogin = datetime_diff("day", LastLogin, now())
-| extend LoginStatus = case(
-    DaysSinceLastLogin == 0, "Today",
-    DaysSinceLastLogin == 1, "Yesterday",
-    DaysSinceLastLogin == 2, "2 Days Ago",
-    DaysSinceLastLogin == 3, "3 Days Ago",
-    DaysSinceLastLogin == 4, "4 Days Ago",
-    DaysSinceLastLogin == 5, "5 Days Ago",
-    DaysSinceLastLogin == 6, "6 Days Ago",
-    DaysSinceLastLogin == 7, "7 Days Ago",
-    DaysSinceLastLogin <= 14, strcat(tostring(DaysSinceLastLogin), " Days Ago"),
-    DaysSinceLastLogin <= 30, strcat(tostring(DaysSinceLastLogin), " Days Ago"),
-    strcat(tostring(DaysSinceLastLogin), " Days Ago")
-)
-| project
-    UserName,
-    ComputerName,
-    LastLogin,
-    DaysSinceLastLogin,
-    LoginStatus
-| order by LastLogin desc
+WVDConnectionNetworkData
+| where TimeGenerated >= ago(5h)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected"
+    | where UserName != ""
+    | project CorrelationId, UserName, SessionHostName
+) on CorrelationId
+| extend ComputerName = tostring(SessionHostName)
+| summarize
+    ["Avg. RTT"] = round(avg(EstRoundTripTimeInMs), 0),
+    ["Max. RTT"] = max(EstRoundTripTimeInMs),
+    ["P90 RTT"] = percentile(EstRoundTripTimeInMs, 90),
+    ["Avg. Bandwidth"] = round(avg(EstAvailableBandwidthKbps), 0),
+    ["Max. Bandwidth"] = max(EstAvailableBandwidthKbps),
+    ["P90 Bandwidth"] = percentile(EstAvailableBandwidthKbps, 90)
+    by UserName, ComputerName
+| order by ["Avg. RTT"] desc
