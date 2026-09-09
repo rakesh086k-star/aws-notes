@@ -1,18 +1,21 @@
-Resources
-| where type =~ "microsoft.compute/virtualmachines"
-| where resourceGroup =~ "RG-AVD-PH-EI-US"
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| where State in ("Connected", "Completed")
 | extend
-    ComputerName = tostring(name),
-    PowerState = tostring(properties.extended.instanceView.powerState.code)
-| extend
-    Status = case(
-        PowerState =~ "PowerState/running", "Online",
-        PowerState =~ "PowerState/stopped", "Stopped",
-        PowerState =~ "PowerState/deallocated", "Deallocated",
-        "Unavailable"
-    )
+    ComputerName = tostring(split(SessionHostName, ".")[0]),
+    UserName = tostring(UserName)
 | summarize
-    Online = countif(Status == "Online"),
-    Stopped = countif(Status == "Stopped"),
-    Deallocated = countif(Status == "Deallocated"),
-    Unavailable = countif(Status == "Unavailable")
+    arg_max(TimeGenerated, State)
+    by CorrelationId, ComputerName, UserName
+| extend
+    SessionStatus = case(
+        State == "Connected", "Online",
+        State == "Completed", "Disconnected",
+        "Unknown"
+    )
+| project
+    ComputerName,
+    UserName,
+    SessionStatus,
+    LastSeen = TimeGenerated
+| order by SessionStatus asc, ComputerName asc
