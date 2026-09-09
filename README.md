@@ -1,29 +1,47 @@
-Resources
+let VMStatus =
+arg("").Resources
 | where type =~ "microsoft.compute/virtualmachines"
 | where resourceGroup =~ "RG-AVD-PH-EI-US"
 | extend
     ComputerName = tostring(name),
-    powerState = tostring(properties.extended.instanceView.powerState.code)
-| summarize
-    Online = countif(powerState == "PowerState/running"),
-    Stopped = countif(powerState == "PowerState/stopped"),
-    Deallocated = countif(powerState == "PowerState/deallocated"),
-    Unavailable = countif(
-        powerState != "PowerState/running"
-        and powerState != "PowerState/stopped"
-        and powerState != "PowerState/deallocated"
+    PowerStateCode = tostring(properties.extended.instanceView.powerState.code)
+| extend
+    Status = case(
+        PowerStateCode == "PowerState/running", "Online",
+        PowerStateCode == "PowerState/stopped", "Stopped",
+        PowerStateCode == "PowerState/deallocated", "Deallocated",
+        "Unavailable"
     )
 | project
-    Status = pack_array("Online", "Stopped", "Deallocated", "Unavailable"),
-    Count = pack_array(Online, Stopped, Deallocated, Unavailable)
-| mv-expand Status, Count
+    VMId = tolower(tostring(id)),
+    ComputerName,
+    Status;
+
+let CurrentUsers =
+WVDConnections
+| where TimeGenerated >= ago(24h)
+| summarize arg_max(TimeGenerated, *) by CorrelationId
+| where State == "Connected"
+| extend
+    VMId = tolower(tostring(SessionHostAzureVmId)),
+    ComputerName = tostring(split(SessionHostName, ".")[0]),
+    UserName = tostring(UserName)
 | project
-    Status = tostring(Status),
-    Count = toint(Count)
+    VMId,
+    ComputerName,
+    UserName;
+
+VMStatus
+| join kind=leftouter CurrentUsers on VMId
+| project
+    ComputerName,
+    UserName = iff(isempty(UserName), "No User", UserName),
+    Status
 | order by case(
     Status == "Online", 1,
     Status == "Stopped", 2,
     Status == "Deallocated", 3,
     Status == "Unavailable", 4,
     5
-) as
+) asc,
+ComputerName asc
