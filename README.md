@@ -4,21 +4,20 @@ WVDConnectionNetworkData
     WVDConnections
     | where State == "Connected" and UserName != ""
     | summarize arg_max(TimeGenerated, *) by UserName
+    | extend Geo = geo_info_from_ip_address(ClientIPAddress)
     | extend
-        Geo = geo_info_from_ip_address(ClientIPAddress),
         Country = tostring(Geo.country),
         City = tostring(Geo.city),
         ComputerName = tostring(SessionHostName)
-    | extend
-        AccessMethod = case(
-            ClientType contains "web", "Web Browser",
-            ClientType contains "msrdc", "Windows App",
-            ClientType contains "msrdcx", "Windows App",
-            ClientType contains "android", "Windows App (Android)",
-            ClientType contains "ios", "Windows App (iOS)",
-            ClientType contains "mac", "Windows App (macOS)",
-            "Other"
-        )
+    | extend AccessMethod = case(
+        ClientType contains "web", "Web Browser",
+        ClientType contains "msrdc", "Windows App",
+        ClientType contains "msrdcx", "Windows App",
+        ClientType contains "android", "Windows App (Android)",
+        ClientType contains "ios", "Windows App (iOS)",
+        ClientType contains "mac", "Windows App (macOS)",
+        "Other"
+    )
     | project
         CorrelationId,
         UserName,
