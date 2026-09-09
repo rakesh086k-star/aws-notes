@@ -40,7 +40,7 @@ ResourceUtilization
 | project
     ComputerName,
     UserName,
-    CPU_Utilization,
-    Memory_Utilization,
-    Disk_Utilization
-| order by CPU_Utilization desc
+    CPU_Utilization = strcat(tostring(CPU_Utilization), "%"),
+    Memory_Utilization = strcat(tostring(Memory_Utilization), "%"),
+    Disk_Utilization = strcat(tostring(Disk_Utilization), "%")
+| order by ComputerName asc
