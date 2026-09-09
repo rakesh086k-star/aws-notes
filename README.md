@@ -11,3 +11,7 @@ Remove-Item "C:\Users\Shubham235269_OLD" -Recurse -Force
 
 
 Stop-Process -Name Dropbox -Force -ErrorAction SilentlyContinue
+
+
+takeown /F "C:\Users\Shubham235269" /R /D Y
+icacls "C:\Users\Shubham235269" /grant Administrators:F /T
