@@ -15,20 +15,20 @@ arg("").Resources
 | join kind=leftouter hint.remote=right (
     WVDConnections
     | where TimeGenerated >= ago(24h)
-    | where State =~ "Connected"
     | extend
         ComputerName = tolower(tostring(split(SessionHostName, ".")[0])),
         UserName = tostring(UserName)
-    | summarize UserNames = make_set(UserName) by ComputerName
+    | summarize arg_max(TimeGenerated, State) by ComputerName, UserName
+    | where State =~ "Connected"
+    | project ComputerName, UserName
 ) on ComputerName
-| extend
-    UserName = iff(
-        isnull(UserNames) or array_length(UserNames) == 0,
-        "No User",
-        strcat_array(UserNames, ", ")
-    )
+| extend UserName = iff(
+    isempty(UserName),
+    "No User",
+    UserName
+)
 | project
     ComputerName,
     UserName,
     VMStatus
-| order by ComputerName asc
+| order by ComputerName asc, UserName asc
