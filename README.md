@@ -1,1 +1,1 @@
-Test-NetConnection stfslogixexperian01.file.core.windows.net -Port 445
+[System.Net.Sockets.TcpClient]::new().Connect("stfslogixexperian01.file.core.windows.net",445)
