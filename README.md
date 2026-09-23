@@ -1,7 +1,6 @@
-arg("").Resources
-| where type =~ "microsoft.compute/virtualmachines"
-| where resourceGroup =~ "RG-AVD-PH-EI-US"
-| extend
-    ComputerName = tolower(tostring(name)),
-    PowerState = tostring(properties.extended.instanceView.powerState.code)
-| project ComputerName, PowerState
+WVDConnections
+| where TimeGenerated >= ago(30m)
+| where State == "Connected"
+| where isnotempty(UserName)
+| extend ComputerName = tolower(tostring(split(SessionHostName, ".")[0]))
+| summarize UserName = strcat_array(make_set(UserName, 50), ", ") by ComputerName
