@@ -1,6 +1,11 @@
-WVDConnections
-| where TimeGenerated >= ago(30m)
-| where State == "Connected"
-| where isnotempty(UserName)
-| extend ComputerName = tolower(tostring(split(SessionHostName, ".")[0]))
-| summarize UserName = strcat_array(make_set(UserName, 50), ", ") by ComputerName
+WVDConnectionNetworkData
+| where TimeGenerated > ago(5h)
+| join kind=inner (
+    WVDConnections
+    | where State == "Connected"
+    | where UserName != ""
+) on CorrelationId
+| summarize
+    AvgRTT = avg(EstRoundTripTimeInMs),
+    MaxRTT = max(EstRoundTripTimeInMs)
+    by UserName
