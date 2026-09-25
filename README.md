@@ -6,6 +6,8 @@ WVDConnectionNetworkData
     | where UserName != ""
 ) on CorrelationId
 | summarize
-    AvgRTT = avg(EstRoundTripTimeInMs),
-    MaxRTT = max(EstRoundTripTimeInMs)
+    AvgRTT = round(avg(EstRoundTripTimeInMs), 2),
+    MaxRTT = max(EstRoundTripTimeInMs),
+    P90RTT = percentile(EstRoundTripTimeInMs, 90)
     by UserName
+| order by AvgRTT desc
