@@ -1,40 +1,118 @@
+# ============================================================
+# AD USER ACCOUNT STATUS CHECK
+# ============================================================
+
 Import-Module ActiveDirectory
 
-$InputFile = "C:\UserList.csv"
-$OutputFile = "C:\User_Status_Report.csv"
+# Input and Output files
+$InputFile  = "C:\Temp\UserList.csv"
+$OutputFile = "C:\Temp\UserAccountStatus.csv"
 
-$Results = foreach ($User in Import-Csv $InputFile) {
+# Check input file
+if (-not (Test-Path $InputFile)) {
+    Write-Host "ERROR: Input file not found: $InputFile" -ForegroundColor Red
+    exit
+}
 
-    $UserID = $User.UserID.Trim()
+# Import users
+$Users = Import-Csv -Path $InputFile
+
+$Results = @()
+
+foreach ($User in $Users) {
+
+    # Safely read UserID and remove spaces
+    $UserID = ([string]$User.UserID).Trim()
+
+    # Skip blank rows
+    if ([string]::IsNullOrWhiteSpace($UserID)) {
+        continue
+    }
+
+    # Remove DOMAIN\ from UserID if present
+    if ($UserID -match "\\") {
+        $UserID = $UserID.Split("\")[-1]
+    }
+
+    # Remove @domain.com if UPN is provided
+    if ($UserID -match "@") {
+        $UserID = $UserID.Split("@")[0]
+    }
+
+    Write-Host "Checking: $UserID" -ForegroundColor Cyan
 
     try {
-        $ADUser = Get-ADUser -Identity $UserID -Properties Enabled, LockedOut, LastLogonDate
 
+        # Get AD User
+        $ADUser = Get-ADUser `
+            -Identity $UserID `
+            -Properties Enabled,LockedOut,LastLogonDate,DisplayName,UserPrincipalName `
+            -ErrorAction Stop
+
+        # Determine account status
         if ($ADUser.Enabled -eq $true) {
-            $Status = "Active"
+            $Status = "Enabled"
         }
         else {
             $Status = "Disabled"
         }
 
-        [PSCustomObject]@{
-            UserID       = $UserID
-            Status       = $Status
-            LockedOut    = $ADUser.LockedOut
-            LastLogon    = $ADUser.LastLogonDate
+        # Locked status
+        if ($ADUser.LockedOut -eq $true) {
+            $LockedOut = "Yes"
         }
+        else {
+            $LockedOut = "No"
+        }
+
+        # Last logon
+        if ($null -ne $ADUser.LastLogonDate) {
+            $LastLogon = $ADUser.LastLogonDate.ToString("yyyy-MM-dd HH:mm:ss")
+        }
+        else {
+            $LastLogon = "Never"
+        }
+
+        # Add result
+        $Results += [PSCustomObject]@{
+            UserID            = $UserID
+            DisplayName       = $ADUser.DisplayName
+            UserPrincipalName = $ADUser.UserPrincipalName
+            Status            = $Status
+            LockedOut         = $LockedOut
+            LastLogon         = $LastLogon
+        }
+
     }
     catch {
-        [PSCustomObject]@{
-            UserID       = $UserID
-            Status       = "Not Found"
-            LockedOut    = ""
-            LastLogon    = ""
+
+        # User not found / other error
+        $Results += [PSCustomObject]@{
+            UserID            = $UserID
+            DisplayName       = ""
+            UserPrincipalName = ""
+            Status            = "Not Found"
+            LockedOut         = ""
+            LastLogon         = ""
         }
+
+        Write-Host "User not found: $UserID" -ForegroundColor Yellow
     }
 }
 
-$Results | Export-Csv $OutputFile -NoTypeInformation
+# Export results
+$Results | Export-Csv `
+    -Path $OutputFile `
+    -NoTypeInformation `
+    -Encoding UTF8
 
-Write-Host "Completed!"
-Write-Host "Report saved at: $OutputFile"
+Write-Host ""
+Write-Host "============================================" -ForegroundColor Green
+Write-Host "Completed!" -ForegroundColor Green
+Write-Host "============================================" -ForegroundColor Green
+Write-Host "Report saved at:" -ForegroundColor Green
+Write-Host $OutputFile -ForegroundColor White
+Write-Host ""
+
+# Display results on screen
+$Results | Format-Table -AutoSize
