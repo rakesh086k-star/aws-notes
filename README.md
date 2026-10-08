@@ -1,1 +1,40 @@
-New-Item -Path "C:\" -Name "FSLogix_OldProfiles" -ItemType Directory -Force | Out-Null; Get-ChildItem "\\stfslogixpph01.file.core.windows.net\profiledata" -File -Recurse -Include *.vhd,*.vhdx -ErrorAction SilentlyContinue | Where-Object {$_.LastWriteTime -lt (Get-Date).AddMonths(-3)} | Select-Object FullName,@{Name="FileName";Expression={$_.Name}},LastWriteTime,@{Name="SizeGB";Expression={[math]::Round($_.Length/1GB,2)}} | Sort-Object LastWriteTime | Export-Csv "C:\FSLogix_OldProfiles\FSLogix_OldProfiles.csv" -NoTypeInformation -Encoding UTF8
+Import-Module ActiveDirectory
+
+$InputFile = "C:\UserList.csv"
+$OutputFile = "C:\User_Status_Report.csv"
+
+$Results = foreach ($User in Import-Csv $InputFile) {
+
+    $UserID = $User.UserID.Trim()
+
+    try {
+        $ADUser = Get-ADUser -Identity $UserID -Properties Enabled, LockedOut, LastLogonDate
+
+        if ($ADUser.Enabled -eq $true) {
+            $Status = "Active"
+        }
+        else {
+            $Status = "Disabled"
+        }
+
+        [PSCustomObject]@{
+            UserID       = $UserID
+            Status       = $Status
+            LockedOut    = $ADUser.LockedOut
+            LastLogon    = $ADUser.LastLogonDate
+        }
+    }
+    catch {
+        [PSCustomObject]@{
+            UserID       = $UserID
+            Status       = "Not Found"
+            LockedOut    = ""
+            LastLogon    = ""
+        }
+    }
+}
+
+$Results | Export-Csv $OutputFile -NoTypeInformation
+
+Write-Host "Completed!"
+Write-Host "Report saved at: $OutputFile"
