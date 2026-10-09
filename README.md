@@ -1,9 +1,20 @@
-$InputFile = "C:\Temp\UserList.csv"
+$InputFile  = "C:\Temp\UserList.csv"
 $OutputFile = "C:\Temp\UserLastLogonReport.csv"
-New-Item -ItemType Directory -Path "C:\Temp" -Force | Out-Null
-$Results = foreach ($row in (Import-Csv $InputFile)) {
-    $id = $row.UserID.Trim()
-    if (!$id) { continue }
+if (!(Test-Path $InputFile)) {
+    Write-Host "Input file not found: $InputFile" -ForegroundColor Red
+    return
+}
+$Rows = Import-Csv -Path $InputFile
+if (!$Rows -or $Rows.Count -eq 0) {
+    Write-Host "CSV is empty or could not be read." -ForegroundColor Red
+    return
+}
+$ColumnName = $Rows[0].PSObject.Properties.Name | Select-Object -First 1
+$Results = foreach ($row in $Rows) {
+    $id = ([string]$row.$ColumnName).Trim()
+    if ([string]::IsNullOrWhiteSpace($id)) {
+        continue
+    }
     Write-Host "Checking $id ..."
     $output = net.exe user $id /domain 2>&1 | Out-String
     $match = [regex]::Match(
@@ -24,6 +35,6 @@ $Results = foreach ($row in (Import-Csv $InputFile)) {
         Status    = $status
     }
 }
-$Results | Export-Csv $OutputFile -NoTypeInformation -Encoding UTF8
+$Results | Export-Csv -Path $OutputFile -NoTypeInformation -Encoding UTF8
 Write-Host "Report saved to $OutputFile" -ForegroundColor Green
 Invoke-Item $OutputFile
