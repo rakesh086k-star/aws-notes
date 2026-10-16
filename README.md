@@ -2,15 +2,19 @@
 let StartTime = datetime(2026-10-12 00:00:00);
 let EndTime = datetime(2026-10-15 23:59:59);
 let TargetUser = "Takshu255467@exlservice.com";
+
+// Step 1: Find session hosts used by Takshu
 let UserHosts =
     WVDConnections
     | where TimeGenerated between (StartTime .. EndTime)
     | where UserName =~ TargetUser
     | where isnotempty(SessionHostName)
-    | summarize by SessionHostName;
+    | distinct SessionHostName;
+
+// Step 2: Collect CPU and memory performance data
 Perf
 | where TimeGenerated between (StartTime .. EndTime)
-| where Computer in~ (UserHosts | project SessionHostName)
+| where Computer in~ (UserHosts)
 | where (
     (ObjectName == "Processor"
         and CounterName == "% Processor Time"
@@ -42,14 +46,14 @@ Perf
     CPU_Max_Percent = round(CPU_Max_Percent, 2),
     Memory_Average_Percent = round(Memory_Average_Percent, 2),
     Memory_Max_Percent = round(Memory_Max_Percent, 2)
-| where CPU_Max_Percent >= 90
-    or Memory_Max_Percent >= 90
+| where CPU_Max_Percent > 90
+    or Memory_Max_Percent > 90
 | extend HighUtilizationReason = case(
-    CPU_Max_Percent >= 90 and Memory_Max_Percent >= 90,
-        "CPU and Memory >= 90%",
-    CPU_Max_Percent >= 90,
-        "CPU >= 90%",
-    "Memory >= 90%"
+    CPU_Max_Percent > 90 and Memory_Max_Percent > 90,
+        "CPU and Memory above 90%",
+    CPU_Max_Percent > 90,
+        "CPU above 90%",
+    "Memory above 90%"
 )
 | project
     TimeBucket,
