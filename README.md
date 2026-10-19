@@ -1,13 +1,24 @@
 
-let StartTime = datetime(2026-10-12 00:00:00);
-let EndTime = datetime(2026-10-15 23:59:59);
-let TargetUser = "Takshu255467@exlservice.com";
-WVDErrors
-| where TimeGenerated between (StartTime .. EndTime)
-| where UserName =~ TargetUser
-| project
-    TimeGenerated,
-    UserName,
-    Code = Code,
-    Message = Message
-| order by TimeGenerated asc
+Resources
+| where type =~ 'microsoft.compute/virtualmachines'
+    or type =~ 'microsoft.compute/virtualmachinescalesets'
+| extend isVMSS = type =~ 'microsoft.compute/virtualmachinescalesets'
+| extend img = iff(
+    isVMSS,
+    properties.virtualMachineProfile.storageProfile.imageReference,
+    properties.storageProfile.imageReference
+)
+| extend publisher = tostring(img.publisher),
+         offer = tostring(img.offer),
+         sku = tostring(img.sku),
+         version = tostring(img.version),
+         imageId = tostring(img.id)
+| extend osType = iff(
+    isVMSS,
+    tostring(properties.virtualMachineProfile.storageProfile.osDisk.osType),
+    tostring(properties.storageProfile.osDisk.osType)
+)
+| project subscriptionId, resourceGroup, name,
+          resourceType=type, location, osType,
+          publisher, offer, sku, version, imageId
+| order by resourceGroup asc, name asc
