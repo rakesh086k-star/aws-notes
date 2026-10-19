@@ -1,19 +1,10 @@
-
 Resources
-| where type =~ 'microsoft.compute/virtualmachines'
-    or type =~ 'microsoft.compute/virtualmachinescalesets'
-| extend img = iff(
-    type =~ 'microsoft.compute/virtualmachinescalesets',
-    properties.virtualMachineProfile.storageProfile.imageReference,
-    properties.storageProfile.imageReference
-)
-| extend publisher = tostring(img.publisher),
-         offer = tostring(img.offer),
-         sku = tostring(img.sku),
-         imageId = tostring(img.id)
-| where sku =~ '19h2-evd'
-    or offer =~ 'Windows-10'
-    or imageId contains '19h2-evd'
-| project subscriptionId, resourceGroup, name, type,
-          publisher, offer, sku, imageId
+| where type =~ "microsoft.compute/virtualmachines"
+| extend OS = tostring(properties.storageProfile.osDisk.osType)
+| extend ImageId = tostring(properties.storageProfile.imageReference.id)
+| extend Publisher = tostring(properties.storageProfile.imageReference.publisher)
+| extend Offer = tostring(properties.storageProfile.imageReference.offer)
+| extend SKU = tostring(properties.storageProfile.imageReference.sku)
+| project subscriptionId, resourceGroup, name, location,
+          OS, Publisher, Offer, SKU, ImageId
 | order by name asc
