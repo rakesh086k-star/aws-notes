@@ -1,10 +1,8 @@
-Resources
-| where type =~ "microsoft.compute/virtualmachines"
-| extend OS = tostring(properties.storageProfile.osDisk.osType)
-| extend ImageId = tostring(properties.storageProfile.imageReference.id)
-| extend Publisher = tostring(properties.storageProfile.imageReference.publisher)
-| extend Offer = tostring(properties.storageProfile.imageReference.offer)
-| extend SKU = tostring(properties.storageProfile.imageReference.sku)
-| project subscriptionId, resourceGroup, name, location,
-          OS, Publisher, Offer, SKU, ImageId
-| order by name asc
+Heartbeat
+| where TimeGenerated >= ago(24h)
+| summarize arg_max(TimeGenerated, *) by Computer
+| extend OSVersion = tostring(column_ifexists("OSVersion", "")),
+         OSName = tostring(column_ifexists("OSName", ""))
+| project Computer, OSName, OSVersion,
+          OSType, LastSeen = TimeGenerated
+| order by Computer asc
