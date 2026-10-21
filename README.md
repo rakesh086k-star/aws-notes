@@ -1,1 +1,2 @@
-teamsbootstrapper.exe -p -o "C:\Windows\Temp\MSTeams.msix"
+Get-AppxPackage MSTeams |
+Select-Object Name, Version, Status, InstallLocation
