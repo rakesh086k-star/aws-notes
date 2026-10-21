@@ -1,1 +1,1 @@
-Test-Path "C:\Windows\Temp"
+Get-ChildItem "C:\Windows\Temp" -Filter "*teams*" -File | Select-Object Name, LastWriteTime
