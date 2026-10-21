@@ -1,5 +1,9 @@
-Start-Process "$env:LOCALAPPDATA\Microsoft\WindowsApps\ms-teams.exe"
+$pkg = Get-AppxPackage MSTeams
+Test-Path "$($pkg.InstallLocation)\ms-teams.exe"
 
 
+Get-AppxPackage MSTeams |
+Format-List Name, Version, Status, InstallLocation, PackageUserInformation
 
-Get-AppxPackage MSTeams | Select-Object -ExpandProperty InstallLocation
+
+explorer.exe "shell:AppsFolder\MSTeams_8wekyb3d8bbwe!MSTeams"
