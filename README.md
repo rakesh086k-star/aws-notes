@@ -1,1 +1,1 @@
-Get-ChildItem "C:\Windows\Temp" -Filter "*teams*" -File | Select-Object Name, LastWriteTime
+Select-String -Path "C:\Windows\Temp\teamsprovision.2026-10-21.log" -Pattern "0x80070490|0x80073CF9|error|failed" -Context 3,5
