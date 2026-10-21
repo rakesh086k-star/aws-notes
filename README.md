@@ -1,1 +1,1 @@
-Select-String -Path "C:\Windows\Temp\teamsprovision.2026-10-21.log" -Pattern "0x80070490|0x80073CF9|error|failed" -Context 3,5
+teamsbootstrapper.exe -p -o "C:\Windows\Temp\MSTeams.msix"
