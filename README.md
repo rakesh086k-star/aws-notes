@@ -1,4 +1,2 @@
-Get-WinEvent -LogName "Microsoft-Windows-AppXDeploymentServer/Operational" -MaxEvents 50 |
-Where-Object { $_.LevelDisplayName -eq "Error" } |
-Select-Object TimeCreated, Id, Message |
-Format-List
+Get-AppxLog | Where-Object { $_.Id -in 401,404 } |
+Select-Object -Last 5 Time, Id, Message
