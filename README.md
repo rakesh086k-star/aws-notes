@@ -1,9 +1,11 @@
-$pkg = Get-AppxPackage MSTeams
-Test-Path "$($pkg.InstallLocation)\ms-teams.exe"
+$exe = "$((Get-AppxPackage MSTeams).InstallLocation)\ms-teams.exe"
+Get-Acl $exe | Format-List Owner, Access
 
 
-Get-AppxPackage MSTeams |
-Format-List Name, Version, Status, InstallLocation, PackageUserInformation
-
-
-explorer.exe "shell:AppsFolder\MSTeams_8wekyb3d8bbwe!MSTeams"
+Get-WinEvent -FilterHashtable @{
+    LogName = 'Microsoft-Windows-AppXDeploymentServer/Operational'
+    StartTime = (Get-Date).AddHours(-4)
+} -ErrorAction SilentlyContinue |
+Where-Object { $_.Message -match 'MSTeams|ms-teams' } |
+Select-Object -First 10 TimeCreated, Id, LevelDisplayName, Message |
+Format-List
