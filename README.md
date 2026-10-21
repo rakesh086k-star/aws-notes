@@ -1,2 +1,1 @@
-$pkg = Get-AppxPackage MSTeams
-Add-AppxPackage -DisableDevelopmentMode -Register "$($pkg.InstallLocation)\AppxManifest.xml"
+Get-AppPackageLog -ActivityID d334c5d6-6f6f-0002-9d90-cc73d61dd01
