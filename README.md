@@ -1,2 +1,1 @@
-Get-AppxPackage MSTeams |
-Select-Object Name, Version, Status, InstallLocation
+Test-Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\ms-teams.exe"
