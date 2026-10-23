@@ -1,1 +1,6 @@
-Get-AppPackageLog -ActivityID d334c5d6-6f6f-0002-9d90-cc73d61dd01
+Get-Process |
+Sort-Object CPU -Descending |
+Select-Object -First 10 ProcessName, Id, CPU,
+@{Name='MemoryMB';Expression={
+    [math]::Round($_.WorkingSet64 / 1MB, 0)
+}}
