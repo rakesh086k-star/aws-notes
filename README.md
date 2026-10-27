@@ -1,17 +1,26 @@
+
 WVDConnections
-| where TimeGenerated > ago(4h)
+| where TimeGenerated >= ago(6d)
 | where isnotempty(UserName)
-| summarize arg_max(TimeGenerated, *) by CorrelationId
-| extend Status = case(
-    State == "Connected", "Active",
-    State == "Started", "Active",
-    State == "Completed", "Disconnected",
-    State
+| where isnotempty(SessionHostName)
+| extend LoginDate = startofday(TimeGenerated)
+| extend DayName = case(
+    dayofweek(LoginDate) == 0d, "Sunday",
+    dayofweek(LoginDate) == 1d, "Monday",
+    dayofweek(LoginDate) == 2d, "Tuesday",
+    dayofweek(LoginDate) == 3d, "Wednesday",
+    dayofweek(LoginDate) == 4d, "Thursday",
+    dayofweek(LoginDate) == 5d, "Friday",
+    dayofweek(LoginDate) == 6d, "Saturday",
+    "Unknown"
 )
-| summarize arg_max(TimeGenerated, *) by UserName, SessionHostName
+| extend ComputerName = tostring(SessionHostName),
+         UserName = tostring(UserName)
+| summarize UniqueUsers = dcount(UserName)
+    by LoginDate, DayName, ComputerName
 | project
-    UserName = tostring(UserName),
-    ComputerName = tostring(SessionHostName),
-    Status,
-    TimeGenerated
-| order by Status asc
+    DayName,
+    LoginDate,
+    ComputerName,
+    UniqueUsers
+| order by LoginDate desc, ComputerName asc
