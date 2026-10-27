@@ -1,6 +1,17 @@
-Get-Process |
-Sort-Object CPU -Descending |
-Select-Object -First 10 ProcessName, Id, CPU,
-@{Name='MemoryMB';Expression={
-    [math]::Round($_.WorkingSet64 / 1MB, 0)
-}}
+WVDConnections
+| where TimeGenerated > ago(4h)
+| where isnotempty(UserName)
+| summarize arg_max(TimeGenerated, *) by CorrelationId
+| extend Status = case(
+    State == "Connected", "Active",
+    State == "Started", "Active",
+    State == "Completed", "Disconnected",
+    State
+)
+| summarize arg_max(TimeGenerated, *) by UserName, SessionHostName
+| project
+    UserName = tostring(UserName),
+    ComputerName = tostring(SessionHostName),
+    Status,
+    TimeGenerated
+| order by Status asc
