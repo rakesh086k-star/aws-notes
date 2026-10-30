@@ -1,2 +1,1 @@
-dir D:\Windows\System32\winload.efi
-dir S:\EFI
+bcdboot D:\Windows /s S: /f UEFI /v
