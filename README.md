@@ -1,5 +1,1 @@
-az vm show \
-  --resource-group "RG-AVD-GA-EI-US" \
-  --name "AZEIEUWGGA-66" \
-  --query "diagnosticsProfile.bootDiagnostics" \
-  --output json
+Add-AppxPackage -Path "C:\Temp\Microsoft.OutlookForWindows_x64.msix"
