@@ -1,1 +1,1 @@
-Add-AppxProvisionedPackage -Online -PackagePath "C:\Temp\Microsoft.OutlookForWindows_x64.msix" -SkipLicense
+.\Setup.exe --provision true --quiet
