@@ -1,4 +1,1 @@
-Get-Partition -DiskNumber 2 | Format-List PartitionNumber,DriveLetter,Type,Size,AccessPaths
-
-
-Get-Volume | Format-Table DriveLetter,FileSystemLabel,FileSystem,Size,HealthStatus
+Set-Partition -DiskNumber 2 -PartitionNumber 3 -NewDriveLetter T
