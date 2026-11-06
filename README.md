@@ -1,1 +1,1 @@
-Get-Disk | Format-Table Number,FriendlyName,OperationalStatus,IsOffline,IsReadOnly,PartitionStyle,Size
+Set-Disk -Number 2 -IsOffline $false
