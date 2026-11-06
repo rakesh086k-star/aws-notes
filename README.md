@@ -1,8 +1,5 @@
-az extension update --name vm-repair
-
-
-az vm encryption show \
+az vm get-instance-view \
   --resource-group RG-AVD-Convex-EI-UK \
   --name AZEIEUWCOD-205 \
-  --query "disks[].encryptionSettings[].enabled" \
-  -o json
+  --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \
+  -o tsv
