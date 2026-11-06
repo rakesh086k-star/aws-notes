@@ -1,5 +1,4 @@
-az vm get-instance-view \
-  --resource-group RG-AVD-Convex-EI-UK \
-  --name AZEIEUWCOD-205 \
-  --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \
-  -o tsv
+az vm repair create \
+  -g RG-AVD-Convex-EI-UK \
+  -n AZEIEUWCOD-205 \
+  --verbose
