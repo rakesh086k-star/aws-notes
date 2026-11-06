@@ -1,1 +1,4 @@
-Set-Partition -DiskNumber 2 -PartitionNumber 3 -NewDriveLetter T
+Get-ChildItem T:\ -Force
+
+
+Get-ChildItem T:\EFI -Recurse
