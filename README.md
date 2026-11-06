@@ -1,4 +1,1 @@
-Get-ChildItem T:\ -Force
-
-
-Get-ChildItem T:\EFI -Recurse
+bcdedit /store T:\EFI\Microsoft\Boot\BCD /enum all
