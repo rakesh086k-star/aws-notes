@@ -1,3 +1,1 @@
-The RI that was due to expire on 13th November 2026 has been renewed for another 3 years.
-
-Additionally, Daniel’s AVD instance has been upgraded to the requested configuration as discussed.
+The AVD environment is logically segregated using separate Azure Resource Groups and dedicated subnets. Network segmentation and access controls are implemented to ensure separation between the environments as required.
