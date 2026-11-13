@@ -1,11 +1,3 @@
-Get-ChildItem 'HKLM:\SOFTWARE\Classes\Installer\Products' |
-ForEach-Object {
-    $p = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
-    if ($p.ProductName -like '*Slack*') {
-        [PSCustomObject]@{
-            ProductName = $p.ProductName
-            RegistryKey = $_.PSChildName
-            LocalPackage = $p.LocalPackage
-        }
-    }
-} | Format-List
+The RI that was due to expire on 13th November 2026 has been renewed for another 3 years.
+
+Additionally, Daniel’s AVD instance has been upgraded to the requested configuration as discussed.
