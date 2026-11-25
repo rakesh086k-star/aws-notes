@@ -1,9 +1,6 @@
-Add-AppxProvisionedPackage -Online `
-  -PackagePath "C:\Temp\Slack.msix" `
-  -SkipLicense `
-  -Regions "all"
-
-
-
 Get-AppxProvisionedPackage -Online |
-Where-Object {$_.DisplayName -like "*Slack*"}
+Where-Object {$_.DisplayName -like "*Get-AppxPackage -AllUsers |
+Where-Object {$_.Name -like "*Slack*"} |
+Select-Object Name, PackageFullName
+
+
